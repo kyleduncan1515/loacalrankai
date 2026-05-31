@@ -23,7 +23,7 @@ const pricingPlans: PricingPlan[] = [
       'Results may vary based on market competition and website factors',
       'Cancel anytime',
     ],
-    stripeLink: 'https://buy.stripe.com/test_8x25kDg5GfDO8S203cbfO02',
+    stripeLink: 'https://buy.stripe.com/aFaeVd28w7Tv2mgcWUfbq03',
   },
   {
     name: 'Growth Plan',
@@ -37,7 +37,7 @@ const pricingPlans: PricingPlan[] = [
       'Results may vary based on market competition and website factors',
       'Cancel anytime',
     ],
-    stripeLink: 'https://buy.stripe.com/test_8x26oH2eQ3V62tEg2abfO01',
+    stripeLink: 'https://buy.stripe.com/3cI00j14s4Hjgd6bSQfbq04',
     popular: true,
   },
   {
@@ -52,7 +52,7 @@ const pricingPlans: PricingPlan[] = [
       'Results may vary based on market competition and website factors',
       'Cancel anytime',
     ],
-    stripeLink: 'https://buy.stripe.com/test_dRm6oH6v61MY4BM8zIbfO00',
+    stripeLink: 'https://buy.stripe.com/00w9AT14s3DfbWQ2igfbq05',
   },
 ];
 
