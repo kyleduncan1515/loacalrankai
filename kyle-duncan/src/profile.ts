@@ -40,7 +40,6 @@ export function loadProfile(path = process.env.SALESMAN_PROFILE ?? "summit-trans
   const missing = [
     !profile.rep.phone && "rep phone",
     !profile.rep.email && !profile.brokerage.email && "email",
-    !profile.brokerage.mcNumber && "MC number",
     !profile.brokerage.physicalAddress && "mailing address",
     !profile.proofPoints.length && "proof points",
   ].filter(Boolean);
