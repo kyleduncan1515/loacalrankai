@@ -30,7 +30,7 @@ export async function coach(profile: BrokerageProfile): Promise<void> {
   let mode = COACH_MODE;
   let label = "coach";
 
-  console.log(`Freight sales coach for ${profile.rep.name} at ${profile.brokerage.name}.${HELP}`);
+  console.log(`Kyle Duncan, ${profile.brokerage.name} sales coach. Locked in.${HELP}`);
 
   const send = async (text: string) => {
     // The current mode rides on the user turn so it never edits the cached system prompt.

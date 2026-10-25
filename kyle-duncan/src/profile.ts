@@ -26,13 +26,23 @@ export interface BrokerageProfile {
   notes?: string;
 }
 
-export function loadProfile(path = process.env.SALESMAN_PROFILE ?? "brokerage.json"): BrokerageProfile {
+export function loadProfile(path = process.env.SALESMAN_PROFILE ?? "summit-transit.json"): BrokerageProfile {
   if (!fs.existsSync(path)) {
     throw new Error(
-      `No brokerage profile at ${path}. Copy brokerage.example.json to brokerage.json and fill it in.`,
+      `No brokerage profile at ${path}. Create one (see summit-transit.json) or set SALESMAN_PROFILE.`,
     );
   }
-  return JSON.parse(fs.readFileSync(path, "utf8")) as BrokerageProfile;
+  const profile = JSON.parse(fs.readFileSync(path, "utf8")) as BrokerageProfile;
+  const missing = [
+    !profile.rep.phone && "rep phone",
+    !profile.rep.email && "rep email",
+    !profile.brokerage.physicalAddress && "mailing address",
+    !profile.proofPoints.length && "proof points",
+  ].filter(Boolean);
+  if (missing.length) {
+    console.warn(`[note] ${path} is missing: ${missing.join(", ")}. Outreach will leave [brackets] where these go.\n`);
+  }
+  return profile;
 }
 
 export function profileToText(p: BrokerageProfile): string {

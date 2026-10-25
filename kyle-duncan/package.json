@@ -1,12 +1,13 @@
 {
-  "name": "freight-salesman",
+  "name": "kyle-duncan",
   "version": "1.0.0",
-  "description": "AI outbound sales agent for a freight brokerage: finds shippers, writes outreach, coaches calls",
+  "description": "Kyle Duncan: AI freight salesman for Summit Transit. Hunts contract awards and projects, finds shippers, writes outreach, coaches calls",
   "scripts": {
+    "hunt": "tsx src/cli.ts hunt",
     "find": "tsx src/cli.ts find",
     "pitch": "tsx src/cli.ts pitch",
     "coach": "tsx src/cli.ts coach",
-    "salesman": "tsx src/cli.ts",
+    "kyle": "tsx src/cli.ts",
     "typecheck": "tsc"
   },
   "dependencies": {

@@ -1,0 +1,64 @@
+{
+  "brokerage": {
+    "name": "Summit Transit",
+    "website": "",
+    "mcNumber": "",
+    "headquarters": "Houston, TX",
+    "physicalAddress": ""
+  },
+  "rep": {
+    "name": "Kyle Duncan",
+    "title": "",
+    "phone": "",
+    "email": ""
+  },
+  "services": [
+    "Full truckload (spot and contract)",
+    "Partial and LTL",
+    "Flatbed, open-deck and heavy haul / oversize with permits",
+    "Port Houston drayage and transload",
+    "Project freight: material deliveries and equipment moves for construction, energy and industrial jobs",
+    "Hot shot and expedited",
+    "Power only",
+    "Backup and surge capacity when a primary carrier falls off"
+  ],
+  "equipment": [
+    "53' dry van",
+    "Reefer",
+    "Flatbed",
+    "Step deck",
+    "Conestoga",
+    "RGN / lowboy",
+    "Hot shot",
+    "Dump / end dump",
+    "Container chassis (drayage)",
+    "Box truck"
+  ],
+  "strongLanes": [
+    "Houston and the Gulf Coast, in and out",
+    "Port Houston imports to inland DCs",
+    "Texas Triangle: Houston, Dallas-Fort Worth, San Antonio, Austin",
+    "Houston to Louisiana and the Southeast"
+  ],
+  "targetIndustries": [
+    "Construction: general contractors, highway and civil, subcontractors and their material suppliers",
+    "Oil, gas, petrochemical and pipeline projects",
+    "Manufacturing and fabrication (steel, pipe, equipment)",
+    "Building materials, aggregate, precast and lumber",
+    "Importers and distributors moving freight off Port Houston",
+    "Food and beverage",
+    "Anyone who just won a contract or announced a project that will move freight"
+  ],
+  "targetRegions": [
+    "Houston metro (Harris, Fort Bend, Montgomery, Brazoria, Galveston, Waller, Liberty, Chambers counties)",
+    "Texas Gulf Coast",
+    "All of Texas"
+  ],
+  "differentiators": [
+    "Houston-based: we know the port, the plants, the Ship Channel and the local carriers",
+    "We haul it all, from a single pallet to an oversize load, so a customer has one call for every kind of freight"
+  ],
+  "proofPoints": [],
+  "thingsWeDoNotDo": [],
+  "notes": "Fill in the blanks above (title, phone, email, MC#, mailing address) and add real proof points: years in business, loads moved, on-time %, a customer story you're allowed to share. Kyle only cites proof points listed here. Specialized freight (hazmat, tanker, oversize) moves through vetted carrier partners with the right authority, permits and insurance; never promise a specific truck or rate before it's confirmed."
+}

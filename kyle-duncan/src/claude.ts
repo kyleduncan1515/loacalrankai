@@ -90,6 +90,7 @@ export async function run(opts: RunOptions): Promise<string> {
       for (const block of response.content) {
         if (block.type !== "tool_use") continue;
         const tool = opts.localTools?.find((t) => t.definition.name === block.name);
+        opts.onActivity?.(block.name);
         try {
           if (!tool) throw new Error(`Unknown tool: ${block.name}`);
           results.push({ type: "tool_result", tool_use_id: block.id, content: await tool.run(block.input) });

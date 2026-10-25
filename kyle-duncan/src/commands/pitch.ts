@@ -42,6 +42,8 @@ The 4 or 5 objections most likely from this specific shipper, each with a word-f
 ## 6. Next step if they say yes
 What to ask for (lanes, volumes, appointment requirements, accessorials, payment terms, credit check) to quote and onboard them.
 
+If the prospect comes with a trigger event (an award, project or announcement), that event is the hook: verify it, lead every touch with it, and tie the sequence to when its freight moves.
+
 Only use facts you can verify. If the company can't be found or clearly isn't a shipper we can serve, say so plainly at the top and keep the kit short.`;
 
 export async function pitchOne(profile: BrokerageProfile, prospect: Prospect, opts: PitchOptions): Promise<string> {
@@ -69,9 +71,13 @@ export async function pitchFromCsv(
   csvPath: string,
   opts: PitchOptions & { limit?: number; minFit?: number },
 ): Promise<void> {
-  let prospects = readCsv(csvPath).filter((p) => p.company);
+  // Leads from `find` carry fit_score; targets from `hunt` carry priority. Best first.
+  const score = (p: Prospect) => Number(p.fit_score || p.priority || 0);
+  let prospects = readCsv(csvPath)
+    .filter((p) => p.company)
+    .sort((a, b) => score(b) - score(a));
   if (opts.minFit !== undefined) {
-    prospects = prospects.filter((p) => Number(p.fit_score || 0) >= opts.minFit!);
+    prospects = prospects.filter((p) => score(p) >= opts.minFit!);
   }
   prospects = prospects.filter((p) => !fs.existsSync(path.join(opts.outDir, `${slug(p.company)}.md`)));
   if (opts.limit) prospects = prospects.slice(0, opts.limit);
