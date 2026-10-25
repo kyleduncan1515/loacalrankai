@@ -3,7 +3,11 @@ import fs from "node:fs";
 export interface BrokerageProfile {
   brokerage: {
     name: string;
+    type?: string;
     website?: string;
+    phone?: string;
+    email?: string;
+    tagline?: string;
     mcNumber?: string;
     headquarters?: string;
     yearsInBusiness?: number;
@@ -35,7 +39,8 @@ export function loadProfile(path = process.env.SALESMAN_PROFILE ?? "summit-trans
   const profile = JSON.parse(fs.readFileSync(path, "utf8")) as BrokerageProfile;
   const missing = [
     !profile.rep.phone && "rep phone",
-    !profile.rep.email && "rep email",
+    !profile.rep.email && !profile.brokerage.email && "email",
+    !profile.brokerage.mcNumber && "MC number",
     !profile.brokerage.physicalAddress && "mailing address",
     !profile.proofPoints.length && "proof points",
   ].filter(Boolean);
@@ -50,7 +55,7 @@ export function profileToText(p: BrokerageProfile): string {
   return `# Who you sell for
 
 Brokerage: ${p.brokerage.name}${p.brokerage.website ? ` (${p.brokerage.website})` : ""}
-${p.brokerage.mcNumber ? `MC#: ${p.brokerage.mcNumber}\n` : ""}${p.brokerage.headquarters ? `HQ: ${p.brokerage.headquarters}\n` : ""}${p.brokerage.yearsInBusiness ? `Years in business: ${p.brokerage.yearsInBusiness}\n` : ""}${p.brokerage.physicalAddress ? `Mailing address (for email footers): ${p.brokerage.physicalAddress}\n` : ""}
+${p.brokerage.type ? `What we are: ${p.brokerage.type}\n` : ""}${p.brokerage.tagline ? `How we describe ourselves: ${p.brokerage.tagline}\n` : ""}${p.brokerage.phone ? `Main phone: ${p.brokerage.phone}\n` : ""}${p.brokerage.email ? `Dispatch email: ${p.brokerage.email}\n` : ""}${p.brokerage.mcNumber ? `MC#: ${p.brokerage.mcNumber}\n` : ""}${p.brokerage.headquarters ? `HQ: ${p.brokerage.headquarters}\n` : ""}${p.brokerage.yearsInBusiness ? `Years in business: ${p.brokerage.yearsInBusiness}\n` : ""}${p.brokerage.physicalAddress ? `Mailing address (for email footers): ${p.brokerage.physicalAddress}\n` : ""}
 Rep (the person whose voice you write in): ${p.rep.name}${p.rep.title ? `, ${p.rep.title}` : ""}
 ${p.rep.phone ? `Phone: ${p.rep.phone}\n` : ""}${p.rep.email ? `Email: ${p.rep.email}\n` : ""}
 ## Services

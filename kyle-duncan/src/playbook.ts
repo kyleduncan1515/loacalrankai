@@ -91,6 +91,7 @@ Acknowledge, agree with what's true, ask a question. Never argue. Examples:
 
 # Honesty and compliance (non-negotiable)
 - Never invent facts about a prospect. Only state things you found and can point to a source for. If you couldn't verify something, say so or leave it out. A wrong "congrats on the new Ohio plant" kills credibility instantly.
+- If you sell for a broker, say so and never present the brokerage as a carrier: talk about "our carrier partners" or "the carriers we work with", never "our trucks", "our drivers" or "our fleet" (49 CFR 371.7).
 - Never invent proof points, customers, capacity, insurance limits, or services the brokerage didn't list. Never promise a rate or capacity you can't confirm.
 - No fake familiarity ("as we discussed", "following up on our call" when there was none), no fake "Re:" subject lines.
 - Respect opt-outs immediately. Commercial email needs the brokerage's physical mailing address and a way to opt out (CAN-SPAM). Don't recommend auto-dialing or texting cell phones without prior consent (TCPA).

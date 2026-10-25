@@ -1,64 +1,62 @@
 {
   "brokerage": {
-    "name": "Summit Transit",
+    "name": "Summit Transit LLC",
+    "type": "Freight brokerage (arranges transportation with vetted carriers; not an asset carrier)",
     "website": "summittransitllc.net",
+    "phone": "832-644-1690",
+    "email": "Summit-Dispatch@summittransitllc.com",
     "mcNumber": "",
-    "headquarters": "Houston, TX",
-    "physicalAddress": ""
+    "headquarters": "Humble, TX (Houston area)",
+    "physicalAddress": "PO Box 398, Humble, TX 77347",
+    "tagline": "Top-quality transportation solutions with a strong emphasis on reliability, professionalism, and exceeding our clients' expectations."
   },
   "rep": {
     "name": "Kyle Duncan",
     "title": "",
-    "phone": "",
+    "phone": "832-644-1690",
     "email": ""
   },
   "services": [
-    "Full truckload (spot and contract)",
-    "Partial and LTL",
-    "Flatbed, open-deck and heavy haul / oversize with permits",
-    "Port Houston drayage and transload",
-    "Project freight: material deliveries and equipment moves for construction, energy and industrial jobs",
-    "Hot shot and expedited",
-    "Power only",
-    "Backup and surge capacity when a primary carrier falls off"
+    "Local trucking: efficient solutions around Houston",
+    "Long-haul transportation: nationwide coverage",
+    "Heavy hauls: nationwide coverage",
+    "Reefer loads: nationwide coverage",
+    "Anything else a customer needs moved: quote it and find the right carrier"
   ],
   "equipment": [
     "53' dry van",
     "Reefer",
     "Flatbed",
     "Step deck",
-    "Conestoga",
-    "RGN / lowboy",
-    "Hot shot",
-    "Dump / end dump",
-    "Container chassis (drayage)",
-    "Box truck"
+    "RGN / lowboy (heavy haul)"
   ],
   "strongLanes": [
-    "Houston and the Gulf Coast, in and out",
-    "Port Houston imports to inland DCs",
-    "Texas Triangle: Houston, Dallas-Fort Worth, San Antonio, Austin",
-    "Houston to Louisiana and the Southeast"
+    "Houston local and Gulf Coast",
+    "Houston outbound nationwide (long haul)",
+    "Heavy haul anywhere in the US",
+    "Reefer anywhere in the US"
   ],
   "targetIndustries": [
     "Construction: general contractors, highway and civil, subcontractors and their material suppliers",
-    "Oil, gas, petrochemical and pipeline projects",
+    "Oil, gas, petrochemical and pipeline projects (heavy haul)",
     "Manufacturing and fabrication (steel, pipe, equipment)",
-    "Building materials, aggregate, precast and lumber",
+    "Food, beverage and produce (reefer)",
+    "Building materials and distributors",
     "Importers and distributors moving freight off Port Houston",
-    "Food and beverage",
     "Anyone who just won a contract or announced a project that will move freight"
   ],
   "targetRegions": [
     "Houston metro (Harris, Fort Bend, Montgomery, Brazoria, Galveston, Waller, Liberty, Chambers counties)",
     "Texas Gulf Coast",
-    "All of Texas"
+    "All of Texas, with freight going anywhere nationwide"
   ],
   "differentiators": [
-    "Houston-based: we know the port, the plants, the Ship Channel and the local carriers",
-    "We haul it all, from a single pallet to an oversize load, so a customer has one call for every kind of freight"
+    "Houston-based team: we know the port, the plants, the Ship Channel and the local carriers",
+    "One call for local, long haul, heavy haul and reefer, so customers don't juggle multiple providers",
+    "Safety and reliability first: carriers are vetted, and a real person stays on the load until it delivers",
+    "Customer focus: we listen and tailor the service to the job, not the other way around"
   ],
   "proofPoints": [],
   "thingsWeDoNotDo": [],
-  "notes": "Fill in the blanks above (title, phone, email, MC#, mailing address) and add real proof points: years in business, loads moved, on-time %, a customer story you're allowed to share. Kyle only cites proof points listed here. Specialized freight (hazmat, tanker, oversize) moves through vetted carrier partners with the right authority, permits and insurance; never promise a specific truck or rate before it's confirmed."
+  "notes": "Summit Transit is a BROKER. Refer to 'our carrier partners' or 'the carriers we work with', never 'our trucks', 'our drivers' or 'our fleet'. Don't add proof points that aren't listed here. Heavy haul and specialized freight move through carriers with the right authority, permits and insurance; never promise a specific truck or rate before it's confirmed. The website is summittransitllc.net but company email uses summittransitllc.com, so confirm which domain goes in signatures."
 }

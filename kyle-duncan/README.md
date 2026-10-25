@@ -26,8 +26,8 @@ export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 Then finish `summit-transit.json`. The company, Houston location, equipment, lanes and target industries are already filled in. Add:
-- Kyle's title, phone and email (outreach is signed with these)
-- MC# and mailing address (the address is required in commercial email footers)
+- Kyle's title and direct email (the main line and dispatch email are already in)
+- MC# (shippers check it)
 - **Real proof points**: years in business, loads moved, on-time %, a customer story you're allowed to share. Kyle only cites what's listed here and never invents any.
 
 ## The daily hunt
