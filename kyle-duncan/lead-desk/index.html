@@ -896,6 +896,7 @@ td.r, th.r { text-align: right; }
 
         ${l.research?.why ? `<div class="block"><h3>Why this lead</h3>
           <div class="brief-text">${esc(l.research.why)}</div>
+          ${l.research.findContact ? `<div class="inline"><span class="help" style="flex:1 1 220px">Find the right person: <span class="num" style="user-select:all">${esc(l.research.findContact)}</span></span><button class="btn small" type="button" data-copy="${esc(l.research.findContact)}">Copy search</button></div>` : ""}
           ${(l.research.evidence || []).length ? `<div class="help">Sources: ${(l.research.evidence || []).map((u) => /^https?:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 60))}</a>` : esc(u)).join(" · ")}</div>` : ""}
         </div>` : ""}
 

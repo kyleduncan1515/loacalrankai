@@ -36,14 +36,17 @@ Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. Use 
 - **Morning shift: awards and projects.** Recent public contract awards (federal awards on USAspending.gov and SAM.gov, TxDOT lettings and low bidders, Harris County and other county commissioners court awards, City of Houston, Port Houston, METRO, school districts, water and utility authorities) and newly announced construction, energy, petrochemical, LNG, pipeline and industrial projects. Follow the freight to whoever controls the trucks: the prime, a subcontractor, a material supplier, or the owner.
 - **Afternoon shift: shippers with a fresh signal.** New or expanding plants, warehouses and distribution centers; manufacturers and distributors hiring logistics or shipping staff; food, produce and beverage shippers heading into a peak; importers moving freight off Port Houston; building materials and steel suppliers.
 
-Prefer the last 30 days. Favor fit with Summit's services (local, long haul, heavy haul, reefer) and closeness to Houston. Quality beats count: if you can only find 4 targets with real evidence, add 4.
+Prefer the last 30 days. Favor fit with Summit's services (local, long haul, heavy haul, reefer) and closeness to Houston.
+
+Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. Only then add fewer than asked. Quality still beats count: never add a target without real evidence.
 
 ### 4. Research each target
 For each company, find out:
 - what they ship and which freight type fits: exactly one of `Local`, `Long haul`, `Heavy haul`, `Reefer`, `Other`
 - the trigger (what happened, when, and the source URL), what freight it creates, and when that freight moves
 - who to talk to: a name if it's published, otherwise the title (project manager, procurement, logistics or shipping manager, plant manager, owner at a small company)
-- the company's published main phone number and published contact email, if any
+- the company's published main phone number and published contact email, if any. Look on the company's own website (contact, locations and about pages), its press releases (media contacts don't count; you want the business line), and its business listings. A lead Kyle can't reach is worth little, so try hard here, and when two targets are otherwise equal, pick the one you can reach.
+- how Kyle can find the right person: a ready-to-paste search string, e.g. `"PV Hardware" Houston (logistics OR "supply chain" OR shipping) manager site:linkedin.com`
 - city and state, and the website
 - a score from 1 to 10: size of the freight opportunity × fit for Summit × how fresh the trigger is
 
@@ -60,7 +63,7 @@ Write six touches per lead. Due dates are business days (Monday to Friday) count
 | t6 | 13 | email | Breakup email: polite and short, door left open. |
 
 Writing rules (from the playbook):
-- Emails under 100 words. Subject lines are 2–5 words, lowercase and specific. Plain text, sounding like a busy person in freight.
+- Emails under 100 words, not counting the signature and footer. Subject lines are 2–5 words, lowercase and specific. Plain text, sounding like a busy person in freight.
 - Open with their trigger, not with Summit. Never write "I hope this finds you well", "touching base" or "just checking in".
 - The ask is small: a quick call, one lane to quote, or being the backup when a carrier falls off. When they say yes, Summit's dispatch quotes it.
 - Sign emails:
@@ -112,7 +115,8 @@ Use one `ArtifactData` `batch` (up to 50 writes). New documents only, so omit `i
     "evidence": ["https://source-url-1", "https://source-url-2"],
     "eventType": "federal award | state/local award | private project | new facility | expansion | hiring | seasonal | other",
     "freightNeeded": "sheet pile, rock, excavators",
-    "timing": "mobilization expected November"
+    "timing": "mobilization expected November",
+    "findContact": "\"Gulf Coast Civil\" (\"project manager\" OR \"equipment manager\") site:linkedin.com"
   },
   "touches": [
     { "id": "t1", "n": 1, "channel": "email", "due": "YYYY-MM-DD", "subject": "galveston levee equipment", "body": "...", "status": "ready", "doneAt": null }
