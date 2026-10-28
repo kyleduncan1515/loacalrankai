@@ -1,0 +1,1239 @@
+<title>Summit Lead Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a work desk. Sticky header with a lane-stripe rule, tabbed views,
+   summary strip first, then the lists you act on. Lead detail opens as a side sheet. */
+:root {
+  --bg: #EEF2F5; --surface: #FFFFFF; --sunk: #E4EAEF; --ink: #13202B; --muted: #566676; --line: #D3DCE4;
+  --accent: #0B5E91; --accent-ink: #FFFFFF; --accent-soft: #DCEBF5;
+  --amber: #A86E00; --amber-line: #E3A21A; --amber-soft: #FBEFD2;
+  --good: #1D7448; --good-soft: #DCF0E4; --bad: #B4382A; --bad-soft: #F8E0DC;
+  --shadow: 0 10px 40px rgba(19, 32, 43, .18);
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D141B; --surface: #15202A; --sunk: #1B2833; --ink: #E4ECF2; --muted: #93A6B7; --line: #273745;
+    --accent: #5DB2EA; --accent-ink: #06121C; --accent-soft: #163246;
+    --amber: #F0B43C; --amber-line: #F0B43C; --amber-soft: #3A2E12;
+    --good: #4CC489; --good-soft: #14321F; --bad: #F07A68; --bad-soft: #3B1C17;
+    --shadow: 0 10px 40px rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D141B; --surface: #15202A; --sunk: #1B2833; --ink: #E4ECF2; --muted: #93A6B7; --line: #273745;
+  --accent: #5DB2EA; --accent-ink: #06121C; --accent-soft: #163246;
+  --amber: #F0B43C; --amber-line: #F0B43C; --amber-soft: #3A2E12;
+  --good: #4CC489; --good-soft: #14321F; --bad: #F07A68; --bad-soft: #3B1C17;
+  --shadow: 0 10px 40px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface);
+  border-bottom: 3px dashed var(--amber-line); }
+.top-inner { max-width: 1240px; margin: 0 auto; padding-block: 12px 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.brand-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-width: 0; flex: 1; }
+.brand h1 { font-size: 28px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.brand .who { color: var(--muted); font-size: 14px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; margin-top: 10px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { border: 0; background: none; padding: 10px 14px 9px; font-family: var(--display); font-size: 17px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .04em; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab:hover { color: var(--ink); }
+
+main { max-width: 1240px; margin: 0 auto; padding-block: 20px 60px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 22px; }
+section.view { display: grid; gap: 22px; min-width: 0; }
+
+/* Buttons */
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; white-space: nowrap; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.danger { color: var(--bad); }
+.btn.amber { background: var(--amber-soft); border-color: var(--amber-line); color: var(--ink); font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Banner */
+.banner { padding: 10px 14px; border-radius: 6px; background: var(--amber-soft); border: 1px solid var(--amber-line); font-size: 14px;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+
+/* Section headings */
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.sec-head h2 { font-size: 22px; text-transform: uppercase; letter-spacing: .03em; }
+.sec-head .count { font-family: var(--mono); color: var(--muted); font-size: 13px; }
+.eyebrow { font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; font-size: 13px; color: var(--muted); font-weight: 600; }
+
+/* KPI strip */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; min-width: 0; }
+.kpi .val { font-family: var(--display); font-size: 40px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.kpi .val small { font-family: var(--mono); font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 4px; }
+.meter { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
+.meter > i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.meter.hit > i { background: var(--good); }
+.kpi .sub { font-size: 13px; color: var(--muted); }
+.kpi.money .val { color: var(--good); }
+
+/* Lists */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; padding: 12px 16px; border-top: 1px solid var(--line); cursor: pointer; align-items: center; }
+.row:first-child { border-top: 0; }
+.row:hover { background: var(--sunk); }
+.row .name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.row .meta { color: var(--muted); font-size: 13px; grid-column: 1; min-width: 0; overflow-wrap: anywhere; }
+.row .side { grid-row: 1 / span 2; grid-column: 2; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.empty { padding: 22px 16px; color: var(--muted); text-align: center; }
+.two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px; }
+.two-col > * { min-width: 0; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  background: var(--sunk); color: var(--ink); white-space: nowrap; letter-spacing: .01em; }
+.chip.s-new { background: var(--sunk); }
+.chip.s-contacted { background: var(--accent-soft); }
+.chip.s-interested { background: var(--accent); color: var(--accent-ink); }
+.chip.s-handed_off, .chip.s-quoted { background: var(--amber-soft); box-shadow: inset 0 0 0 1px var(--amber-line); }
+.chip.s-booked { background: var(--good-soft); color: var(--good); }
+.chip.s-lost { background: var(--bad-soft); color: var(--bad); }
+.chip.overdue { background: var(--bad-soft); color: var(--bad); }
+.chip.due { background: var(--amber-soft); color: var(--ink); }
+.chip.example { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Pipeline */
+.board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.col { background: var(--sunk); border-radius: 8px; padding: 10px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding: 2px 2px 4px; }
+.col-head h3 { font-size: 16px; text-transform: uppercase; letter-spacing: .04em; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px; cursor: pointer; display: grid; gap: 6px; text-align: left; width: 100%; }
+.card:hover { border-color: var(--muted); }
+.card .name { font-weight: 600; overflow-wrap: anywhere; }
+.card .meta { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.col .empty { padding: 10px 4px; font-size: 13px; }
+@media (max-width: 1000px) { .board { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .board { grid-template-columns: 1fr; } }
+
+/* Table */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.filters input[type="search"] { flex: 1 1 220px; min-width: 0; }
+.field input, .field select, .field textarea, .filters input, .filters select, .inline input, .inline select {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 8px 10px; width: 100%; min-width: 0; }
+.filters select { width: auto; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-family: var(--display); text-transform: uppercase; letter-spacing: .05em; font-size: 13px; color: var(--muted);
+  font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 10px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: var(--sunk); }
+td.r, th.r { text-align: right; }
+
+/* Charts */
+.chart-box { padding: 14px 16px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 14px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.funnel { display: grid; gap: 8px; padding: 14px 16px; }
+.fstep { display: grid; grid-template-columns: 120px 1fr 48px; gap: 10px; align-items: center; font-size: 14px; }
+.fbar { height: 18px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.fbar > i { display: block; height: 100%; background: var(--accent); }
+.fstep .r { text-align: right; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 6px 12px; cursor: pointer; font-size: 14px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+
+/* Forms */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.field.wide { grid-column: 1 / -1; }
+.field textarea { min-height: 76px; resize: vertical; }
+.inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.inline > * { flex: 1 1 120px; }
+.inline > .btn { flex: 0 0 auto; }
+.help { font-size: 13px; color: var(--muted); }
+
+/* Sheet */
+.scrim { position: fixed; inset: 0; background: rgba(8, 14, 20, .45); z-index: 20; }
+.sheet { position: fixed; top: 0; right: 0; bottom: 0; width: min(620px, 100%); background: var(--bg); z-index: 21; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-right: env(safe-area-inset-right, 0px); }
+.sheet-head { background: var(--surface); border-bottom: 3px dashed var(--amber-line); padding: 14px 18px; display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.sheet-head h2 { font-size: 26px; overflow-wrap: anywhere; }
+.sheet-body { overflow-y: auto; padding: 18px; display: grid; gap: 18px; align-content: start; flex: 1; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.block h3 { font-size: 17px; text-transform: uppercase; letter-spacing: .05em; }
+.stepper { display: flex; flex-wrap: wrap; gap: 6px; }
+.stepper button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.stepper button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.handoff { background: var(--amber-soft); border: 1px solid var(--amber-line); }
+.handoff pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--mono); font-size: 13px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 6px; padding: 10px; }
+.dispatch-line { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 14px; }
+.dispatch-line .num { user-select: all; }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.timeline li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; font-size: 14px; }
+.timeline .when { color: var(--muted); font-family: var(--mono); font-size: 12px; padding-top: 2px; }
+.loads { width: 100%; font-size: 14px; }
+.loads td, .loads th { padding: 6px 8px; }
+.confirm { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Machine */
+.brief { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px 16px; display: grid; gap: 8px; }
+.brief-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.brief-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14.5px; max-width: 80ch; }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--good); margin-right: 6px; vertical-align: 1px; }
+.status-dot.paused { background: var(--amber-line); }
+.status-dot.failed { background: var(--bad); }
+.touch { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 8px; background: var(--surface); }
+.touch.is-due { border-color: var(--amber-line); box-shadow: inset 3px 0 0 var(--amber-line); }
+.touch.is-closed { opacity: .6; }
+.touch-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+.touch-subj { font-weight: 600; overflow-wrap: anywhere; }
+.touch-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; background: var(--sunk); border-radius: 6px; padding: 10px; margin: 0; font-family: var(--body); }
+.touches { display: grid; gap: 10px; }
+.chip.ch-email { background: var(--accent-soft); }
+.chip.ch-call, .chip.ch-voicemail { background: var(--amber-soft); }
+.chip.ch-linkedin { background: var(--sunk); }
+.chip.machine { background: var(--ink); color: var(--bg); }
+.runs { list-style: none; margin: 0; padding: 0; }
+.runs li { border-top: 1px solid var(--line); padding: 12px 16px; display: grid; gap: 6px; }
+.runs li:first-child { border-top: 0; }
+.runs details summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+.toggle { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+/* Toast */
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 6px; font-size: 14px; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+
+@media (max-width: 520px) {
+  .brand h1 { font-size: 24px; }
+  .kpi .val { font-size: 32px; }
+  .fstep { grid-template-columns: 92px 1fr 40px; }
+  .timeline li { grid-template-columns: 1fr; gap: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: slide .18s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); } to { transform: none; } }
+}
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand-row">
+      <div class="brand">
+        <h1>Summit Lead Desk</h1>
+        <span class="who">Kyle Duncan · Summit Transit LLC · Humble, TX</span>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-import" type="button">Import leads</button>
+        <button class="btn primary" id="btn-add" type="button">+ Add lead</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button class="tab" role="tab" data-view="today" id="tab-today" type="button">Today</button>
+      <button class="tab" role="tab" data-view="pipeline" id="tab-pipeline" type="button">Pipeline</button>
+      <button class="tab" role="tab" data-view="leads" id="tab-leads" type="button">All leads</button>
+      <button class="tab" role="tab" data-view="score" id="tab-score" type="button">Scoreboard</button>
+      <button class="tab" role="tab" data-view="machine" id="tab-machine" type="button">Machine</button>
+      <button class="tab" role="tab" data-view="goals" id="tab-goals" type="button">Goals &amp; pay</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="status-banner" class="banner" hidden></div>
+  <div id="example-banner" class="banner" hidden>
+    <span>The leads marked <b>Example</b> are made-up samples so you can see how the desk works.</span>
+    <span class="confirm" id="example-actions"><button class="btn small" id="btn-clear-examples" type="button">Remove examples</button></span>
+  </div>
+
+  <!-- TODAY -->
+  <section class="view" id="view-today" hidden>
+    <div id="brief-box"></div>
+    <div>
+      <div class="sec-head"><h2>Outreach due</h2><span class="count" id="touch-count"></span></div>
+      <div class="panel"><ul class="rows" id="touch-list"></ul></div>
+    </div>
+    <div>
+      <div class="sec-head"><h2>This week</h2><span class="count" id="week-label"></span></div>
+      <div class="kpis" id="kpis-week"></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="sec-head"><h2>Follow up today</h2><span class="count" id="due-count"></span></div>
+        <div class="panel"><ul class="rows" id="due-list"></ul></div>
+      </div>
+      <div>
+        <div class="sec-head"><h2>New, not contacted</h2><span class="count" id="new-count"></span></div>
+        <div class="panel"><ul class="rows" id="new-list"></ul></div>
+      </div>
+    </div>
+    <div>
+      <div class="sec-head"><h2>With dispatch</h2><span class="count" id="disp-count"></span></div>
+      <div class="panel"><ul class="rows" id="disp-list"></ul></div>
+    </div>
+  </section>
+
+  <!-- PIPELINE -->
+  <section class="view" id="view-pipeline" hidden>
+    <div class="sec-head"><h2>Pipeline</h2><span class="count" id="pipe-count"></span></div>
+    <div class="board" id="board"></div>
+    <p class="help" id="lost-note"></p>
+  </section>
+
+  <!-- ALL LEADS -->
+  <section class="view" id="view-leads" hidden>
+    <div class="filters">
+      <input type="search" id="f-search" placeholder="Search company, contact, city, notes" aria-label="Search leads">
+      <select id="f-stage" aria-label="Stage"></select>
+      <select id="f-freight" aria-label="Freight"></select>
+      <select id="f-source" aria-label="Source"></select>
+    </div>
+    <div class="panel table-wrap">
+      <table>
+        <thead><tr><th>Company</th><th>Contact</th><th>Stage</th><th>Freight</th><th>Source</th><th>Next follow-up</th><th class="r">Loads</th></tr></thead>
+        <tbody id="lead-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SCOREBOARD -->
+  <section class="view" id="view-score" hidden>
+    <div class="sec-head">
+      <h2>Scoreboard</h2>
+      <div class="seg" role="group" aria-label="Time range">
+        <button type="button" data-range="week" aria-pressed="true">This week</button>
+        <button type="button" data-range="month" aria-pressed="false">This month</button>
+        <button type="button" data-range="all" aria-pressed="false">All time</button>
+      </div>
+    </div>
+    <div class="kpis" id="kpis-score"></div>
+    <div>
+      <div class="sec-head"><h2>Last 8 weeks</h2>
+        <div class="legend"><span><i style="background: var(--accent)"></i>Handed to dispatch</span><span><i style="background: var(--good)"></i>Loads booked</span></div>
+      </div>
+      <div class="panel chart-box" id="week-chart"></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="sec-head"><h2>Where leads stand</h2></div>
+        <div class="panel funnel" id="funnel"></div>
+      </div>
+      <div>
+        <div class="sec-head"><h2>Which sources work</h2></div>
+        <div class="panel table-wrap">
+          <table>
+            <thead><tr><th>Source</th><th class="r">Leads</th><th class="r">To dispatch</th><th class="r">Booked</th><th class="r">Margin</th></tr></thead>
+            <tbody id="source-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MACHINE -->
+  <section class="view" id="view-machine" hidden>
+    <div class="block">
+      <div class="brief-head"><h3>Machine status</h3><span id="m-status" class="muted"></span></div>
+      <p class="help" style="margin:0">The machine runs on its own every weekday around 6:40am and 12:40pm Houston time. Each run it hunts new freight leads, researches them, writes the full outreach sequence for each one into this desk, and leaves you a brief. It never sends anything or contacts anyone. You do that from <b>Outreach due</b> on the Today tab.</p>
+    </div>
+    <div class="block">
+      <h3>Controls</h3>
+      <label class="toggle" for="m-paused"><input type="checkbox" id="m-paused"> Pause the machine</label>
+      <div class="form-grid">
+        <div class="field"><label for="m-per-run">New leads per run</label><input id="m-per-run" type="number" min="0" max="25"></div>
+        <div class="field"><label for="m-area">Hunting area</label><input id="m-area" placeholder="Houston metro and the Texas Gulf Coast"></div>
+        <div class="field wide"><label for="m-focus">Focus</label><input id="m-focus" placeholder="e.g. heavy haul for pipeline and highway jobs, reefer shippers in Katy"></div>
+        <div class="field wide"><label for="m-notes">Standing instructions for the machine</label><textarea id="m-notes" placeholder="e.g. Skip anything under $250k. Prefer companies within 50 miles of Humble. Don't target national carriers or other brokers."></textarea></div>
+      </div>
+      <div><button class="btn primary" id="btn-save-machine" type="button">Save controls</button></div>
+    </div>
+    <div>
+      <div class="sec-head"><h2>Run history</h2><span class="count" id="run-count"></span></div>
+      <div class="panel"><ul class="runs" id="run-list"></ul></div>
+    </div>
+  </section>
+
+  <!-- GOALS & PAY -->
+  <section class="view" id="view-goals" hidden>
+    <div class="block">
+      <h3>Your pay</h3>
+      <div class="form-grid">
+        <div class="field"><label for="g-pct">Your % of margin</label><input id="g-pct" type="number" min="0" max="100" step="0.5" placeholder="e.g. 30"></div>
+      </div>
+      <p class="help">Earnings on the scoreboard are the margin on loads your leads booked, times this percentage. Enter each load's margin as dispatch reports it.</p>
+    </div>
+    <div class="block">
+      <h3>Weekly goals</h3>
+      <div class="form-grid">
+        <div class="field"><label for="g-leads">New leads</label><input id="g-leads" type="number" min="0"></div>
+        <div class="field"><label for="g-contacts">Contacts made</label><input id="g-contacts" type="number" min="0"></div>
+        <div class="field"><label for="g-handoffs">Handed to dispatch</label><input id="g-handoffs" type="number" min="0"></div>
+        <div class="field"><label for="g-loads">Loads booked</label><input id="g-loads" type="number" min="0"></div>
+        <div class="field"><label for="g-earn">Monthly earnings goal ($)</label><input id="g-earn" type="number" min="0" step="50"></div>
+      </div>
+      <p class="help">A contact is any call, email, text or visit you log on a lead.</p>
+    </div>
+    <div class="block">
+      <h3>Summit dispatch</h3>
+      <div class="dispatch-line"><span>Phone</span><span class="num">832-644-1690</span><button class="btn small" type="button" data-copy="832-644-1690">Copy</button></div>
+      <div class="dispatch-line"><span>Email</span><span class="num">Summit-Dispatch@summittransitllc.com</span><button class="btn small" type="button" data-copy="Summit-Dispatch@summittransitllc.com">Copy</button></div>
+    </div>
+    <div><button class="btn primary" id="btn-save-goals" type="button">Save goals &amp; pay</button></div>
+  </section>
+</main>
+
+<div id="scrim" class="scrim" hidden></div>
+<aside id="sheet" class="sheet" hidden aria-modal="true" role="dialog" aria-labelledby="sheet-title"></aside>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(() => {
+  // ---------- constants ----------
+  const STAGES = [
+    { id: "new", label: "New" },
+    { id: "contacted", label: "Contacted" },
+    { id: "interested", label: "Interested" },
+    { id: "handed_off", label: "With dispatch" },
+    { id: "quoted", label: "Quoted" },
+    { id: "booked", label: "Booked" },
+    { id: "lost", label: "Lost" },
+  ];
+  const STAGE_LABEL = Object.fromEntries(STAGES.map((s) => [s.id, s.label]));
+  const STAGE_ORDER = Object.fromEntries(STAGES.map((s, i) => [s.id, i]));
+  const FREIGHT = ["Local", "Long haul", "Heavy haul", "Reefer", "Other"];
+  const SOURCES = ["Cold call", "Referral", "Award hunt", "Web research", "Purchased list", "LinkedIn", "Walk-in", "Import"];
+  const CONTACT_TYPES = { call: "Call", email: "Email", text: "Text", linkedin: "LinkedIn", visit: "Visit", note: "Note" };
+  const CHANNEL_LABEL = { email: "Email", call: "Call", voicemail: "Voicemail", linkedin: "LinkedIn" };
+  const CHANNEL_ACTIVITY = { email: "email", call: "call", voicemail: "call", linkedin: "linkedin" };
+  const OPEN_STAGES = new Set(["new", "contacted"]);
+  const DEFAULT_MACHINE = { paused: false, newLeadsPerRun: 8, area: "Houston metro and the Texas Gulf Coast", focus: "", notes: "" };
+  const COUNTS_AS_CONTACT = new Set(["call", "email", "text", "linkedin", "visit"]);
+  const DISPATCH_PHONE = "832-644-1690";
+  const DISPATCH_EMAIL = "Summit-Dispatch@summittransitllc.com";
+  const DEFAULT_SETTINGS = { commissionPct: null, goals: { leads: 25, contacts: 50, handoffs: 5, loads: 2, monthlyEarnings: null } };
+
+  // ---------- state ----------
+  let db = null;
+  let mode = "loading"; // loading | live | local
+  const leads = new Map();
+  let settings = structuredClone(DEFAULT_SETTINGS);
+  let machine = structuredClone(DEFAULT_MACHINE);
+  let runs = [];
+  let view = "today";
+  let range = "week";
+  let openId = null;
+  let draft = null; // lead being edited in the sheet
+  const chains = {};
+
+  // ---------- helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const pad = (n) => String(n).padStart(2, "0");
+  const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const todayStr = () => ymd(new Date());
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const weekStart = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const dow = (x.getDay() + 6) % 7; return addDays(x, -dow); };
+  const monthStart = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
+  const parseDay = (s) => { if (!s) return null; const [y, m, d] = s.slice(0, 10).split("-").map(Number); return new Date(y, m - 1, d); };
+  const inRange = (iso, from, to) => { if (!iso) return false; const t = iso.length <= 10 ? parseDay(iso) : new Date(iso); return t >= from && t < to; };
+  const fmtDay = (s) => { const d = parseDay(s); return d ? d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""; };
+  const fmtWhen = (iso) => { const d = new Date(iso); return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); };
+  const money = (n) => "$" + Math.round(n || 0).toLocaleString();
+  const num = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : null; };
+  const nowIso = () => new Date().toISOString();
+
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast.timer); toast.timer = setTimeout(() => (t.hidden = true), 2600);
+  }
+  async function copy(text, label = "Copied") {
+    try { await navigator.clipboard.writeText(text); toast(label); }
+    catch { toast("Copy didn't work here. Select the text and copy it."); }
+  }
+
+  function newLeadId() {
+    try { if (db) return db.collection("leads").doc().id; } catch {}
+    return "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  function blankLead() {
+    return { id: newLeadId(), company: "", contactName: "", contactTitle: "", phone: "", email: "", location: "", website: "",
+      freight: "", source: "", stage: "new", nextFollowUp: "", notes: "", activity: [], loads: [],
+      createdAt: nowIso(), updatedAt: nowIso(), handedOffAt: null, bookedAt: null, lostReason: "", isNew: true };
+  }
+  function plain(lead) { const { id, isNew, ...rest } = lead; return JSON.parse(JSON.stringify(rest)); }
+
+  // ---------- persistence ----------
+  function queue(key, fn) {
+    const next = (chains[key] || Promise.resolve()).catch(() => {}).then(fn);
+    chains[key] = next;
+    return next;
+  }
+  function explain(e) {
+    if (e?.code === "quota_exceeded") return "The desk is full. Delete old leads to add more.";
+    if (e?.code === "resource_exhausted") return "Saving too fast. Wait a moment and try again.";
+    return e?.message || "Something went wrong saving.";
+  }
+  async function saveLead(lead) {
+    lead.updatedAt = nowIso();
+    delete lead.isNew;
+    leads.set(lead.id, lead);
+    renderAll();
+    if (!db) return;
+    try { await queue(lead.id, () => db.collection("leads").doc(lead.id).set(plain(lead))); }
+    catch (e) { toast("Couldn't save: " + explain(e)); }
+  }
+  async function deleteLead(id) {
+    leads.delete(id); renderAll();
+    if (!db) return;
+    try { await queue(id, () => db.collection("leads").doc(id).delete()); }
+    catch (e) { toast("Couldn't delete: " + explain(e)); }
+  }
+  async function saveSettings() {
+    renderAll();
+    if (!db) { toast("Saved for this visit"); return; }
+    try { await queue("settings", () => db.doc("settings/main").set(JSON.parse(JSON.stringify(settings)))); toast("Saved"); }
+    catch (e) { toast("Couldn't save: " + explain(e)); }
+  }
+
+  async function connect() {
+    let d = null;
+    try { d = window.claude?.use ? await window.claude.use("db") : null; } catch { d = null; }
+    if (!d) {
+      mode = "local";
+      const b = $("status-banner");
+      b.textContent = "Saving isn't available in this view, so changes last only until you close the page. Open the desk from your Claude account to keep your leads.";
+      b.hidden = false;
+      renderAll();
+      return;
+    }
+    db = d; mode = "live";
+    db.collection("leads").onSnapshot((snap) => {
+      leads.clear();
+      for (const doc of snap.docs) leads.set(doc.id, { ...structuredClone(doc.data()), id: doc.id });
+      renderAll();
+      if (openId && !draft?.isNew && !leads.has(openId)) closeSheet();
+    }, (e) => { toast("Lost connection to your leads. Reload the page."); console.error(e); });
+    db.doc("settings/main").onSnapshot((snap) => {
+      if (snap.exists) {
+        const s = structuredClone(snap.data());
+        settings = { ...structuredClone(DEFAULT_SETTINGS), ...s, goals: { ...DEFAULT_SETTINGS.goals, ...(s.goals || {}) } };
+      }
+      fillGoalsForm(); renderAll();
+    }, (e) => console.error(e));
+    db.doc("settings/machine").onSnapshot((snap) => {
+      machine = { ...structuredClone(DEFAULT_MACHINE), ...(snap.exists ? structuredClone(snap.data()) : {}) };
+      if (view === "machine" && !machineDirty) fillMachineForm();
+      renderAll();
+    }, (e) => console.error(e));
+    db.collection("runs").orderBy("at", "desc").limit(40).onSnapshot((snap) => {
+      runs = snap.docs.map((d) => ({ ...structuredClone(d.data()), id: d.id }));
+      renderAll();
+    }, (e) => console.error(e));
+  }
+  let machineDirty = false;
+  function fillMachineForm() {
+    $("m-paused").checked = !!machine.paused;
+    $("m-per-run").value = machine.newLeadsPerRun ?? "";
+    $("m-area").value = machine.area || ""; $("m-focus").value = machine.focus || ""; $("m-notes").value = machine.notes || "";
+    machineDirty = false;
+  }
+  async function saveMachine() {
+    machine = { ...machine, paused: $("m-paused").checked, newLeadsPerRun: Math.max(0, Math.min(25, num($("m-per-run").value) ?? DEFAULT_MACHINE.newLeadsPerRun)),
+      area: $("m-area").value.trim(), focus: $("m-focus").value.trim(), notes: $("m-notes").value.trim(), updatedAt: nowIso() };
+    machineDirty = false;
+    renderAll();
+    if (!db) { toast("Saved for this visit"); return; }
+    try { await queue("machine", () => db.doc("settings/machine").set(JSON.parse(JSON.stringify(machine)))); toast(machine.paused ? "Machine paused" : "Controls saved"); }
+    catch (e) { toast("Couldn't save: " + explain(e)); }
+  }
+
+  // ---------- touches ----------
+  function openTouches(l) { return OPEN_STAGES.has(l.stage) ? (l.touches || []).filter((t) => t.status === "ready") : []; }
+  function dueTouches() {
+    const t = todayStr(), out = [];
+    for (const l of leads.values()) for (const tc of openTouches(l)) if ((tc.due || t) <= t) out.push({ l, tc });
+    return out.sort((a, b) => (a.tc.due || "").localeCompare(b.tc.due || "") || (b.l.research?.score || 0) - (a.l.research?.score || 0));
+  }
+  function channelChip(c) { return `<span class="chip ch-${esc(c)}">${esc(CHANNEL_LABEL[c] || c)}</span>`; }
+
+  // ---------- metrics ----------
+  function stats(from, to) {
+    let added = 0, contacts = 0, handoffs = 0, loads = 0, margin = 0, revenue = 0;
+    for (const l of leads.values()) {
+      if (inRange(l.createdAt, from, to)) added++;
+      if (inRange(l.handedOffAt, from, to)) handoffs++;
+      for (const a of l.activity || []) if (COUNTS_AS_CONTACT.has(a.type) && inRange(a.at, from, to)) contacts++;
+      for (const ld of l.loads || []) if (inRange(ld.date, from, to)) { loads++; margin += ld.margin || 0; revenue += ld.revenue || 0; }
+    }
+    const pct = num(settings.commissionPct);
+    return { added, contacts, handoffs, loads, margin, revenue, earnings: pct != null ? margin * pct / 100 : null };
+  }
+  function rangeBounds(r) {
+    const now = new Date();
+    if (r === "week") { const f = weekStart(now); return [f, addDays(f, 7)]; }
+    if (r === "month") { const f = monthStart(now); return [f, new Date(f.getFullYear(), f.getMonth() + 1, 1)]; }
+    return [new Date(2000, 0, 1), addDays(now, 1)];
+  }
+
+  // ---------- rendering ----------
+  function kpi(label, value, goal, extra = "") {
+    const hasGoal = goal != null && goal !== "" && Number(goal) > 0;
+    const pct = hasGoal ? Math.min(100, (value / Number(goal)) * 100) : 0;
+    return `<div class="kpi"><span class="eyebrow">${esc(label)}</span>
+      <span class="val">${esc(value)}${hasGoal ? `<small>/ ${esc(goal)}</small>` : ""}</span>
+      ${hasGoal ? `<div class="meter ${value >= Number(goal) ? "hit" : ""}"><i style="width:${pct}%"></i></div>` : ""}
+      ${extra ? `<span class="sub">${extra}</span>` : ""}</div>`;
+  }
+  function moneyKpi(label, s, goal) {
+    const pct = num(settings.commissionPct);
+    if (pct == null) {
+      return `<div class="kpi money"><span class="eyebrow">${esc(label)}</span><span class="val">${money(s.margin)}</span>
+        <span class="sub">Margin from your leads. Set your % in Goals &amp; pay to see earnings.</span></div>`;
+    }
+    const hasGoal = goal != null && Number(goal) > 0;
+    const p = hasGoal ? Math.min(100, (s.earnings / Number(goal)) * 100) : 0;
+    return `<div class="kpi money"><span class="eyebrow">${esc(label)}</span><span class="val">${money(s.earnings)}${hasGoal ? `<small>/ ${money(goal)}</small>` : ""}</span>
+      ${hasGoal ? `<div class="meter ${s.earnings >= goal ? "hit" : ""}"><i style="width:${p}%"></i></div>` : ""}
+      <span class="sub">${pct}% of ${money(s.margin)} margin</span></div>`;
+  }
+
+  function followState(l) {
+    if (!l.nextFollowUp || l.stage === "booked" || l.stage === "lost") return null;
+    const t = todayStr();
+    if (l.nextFollowUp < t) return "overdue";
+    if (l.nextFollowUp === t) return "due";
+    return "later";
+  }
+  function stageChip(stage) { return `<span class="chip s-${esc(stage)}">${esc(STAGE_LABEL[stage] || stage)}</span>`; }
+  function rowHtml(l, sideHtml) {
+    const meta = [l.contactName && `${l.contactName}${l.contactTitle ? ", " + l.contactTitle : ""}`, l.location, l.freight].filter(Boolean).map(esc).join(" · ");
+    return `<li class="row" tabindex="0" data-open="${esc(l.id)}">
+      <span class="name">${esc(l.company || "Untitled lead")}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.origin === "machine" ? ` <span class="chip machine">Machine${l.research?.score ? " · " + esc(l.research.score) : ""}</span>` : ""}</span>
+      <span class="side">${sideHtml}</span>
+      <span class="meta">${meta || "&nbsp;"}</span></li>`;
+  }
+  const byFollow = (a, b) => (a.nextFollowUp || "9999").localeCompare(b.nextFollowUp || "9999");
+
+  function briefHtml() {
+    const r = runs[0];
+    if (!r) return `<div class="brief"><div class="brief-head"><span class="eyebrow">Machine brief</span></div><div class="brief-text muted">No runs yet. The machine's first brief shows up here after its next scheduled run.</div></div>`;
+    const dot = r.status === "failed" ? "failed" : r.status === "paused" ? "paused" : "";
+    return `<div class="brief"><div class="brief-head"><span class="eyebrow"><span class="status-dot ${dot}"></span>Machine brief · ${esc(r.slot || "run")}</span><span class="muted num" style="font-size:12px">${esc(fmtWhen(r.at))}</span></div>
+      <div class="brief-text">${esc(r.brief || "")}</div>
+      <div class="tags"><span class="chip">${esc(r.newLeads ?? 0)} new lead${r.newLeads === 1 ? "" : "s"}</span><span class="chip">${esc(r.touchesWritten ?? 0)} touches written</span></div></div>`;
+  }
+
+  function renderToday() {
+    $("brief-box").innerHTML = briefHtml();
+    const dt = dueTouches();
+    $("touch-count").textContent = dt.length ? `${dt.length} to do` : "";
+    $("touch-list").innerHTML = dt.length ? dt.map(({ l, tc }) => {
+      const total = (l.touches || []).length;
+      const late = tc.due && tc.due < todayStr();
+      return `<li class="row" tabindex="0" data-open="${esc(l.id)}" data-touch-focus="${esc(tc.id)}">
+        <span class="name">${esc(l.company || "Untitled lead")}${l.example ? ' <span class="chip example">Example</span>' : ""}</span>
+        <span class="side">${channelChip(tc.channel)}${late ? `<span class="chip overdue">Since ${esc(fmtDay(tc.due))}</span>` : ""}</span>
+        <span class="meta">Touch ${esc(tc.n)} of ${total}${tc.subject ? " · " + esc(tc.subject) : ""}</span></li>`;
+    }).join("") : `<li class="empty">${[...leads.values()].some((l) => (l.touches || []).length) ? "All caught up. New touches show up here on the day they're due." : "Nothing yet. When the machine adds leads, their emails, calls and follow-ups show up here on the day they're due."}</li>`;
+    const [from, to] = rangeBounds("week");
+    const s = stats(from, to);
+    const g = settings.goals || {};
+    $("week-label").textContent = `${from.toLocaleDateString(undefined, { month: "short", day: "numeric" })} to ${addDays(to, -1).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+    const ms = stats(...rangeBounds("month"));
+    $("kpis-week").innerHTML = kpi("New leads", s.added, g.leads) + kpi("Contacts made", s.contacts, g.contacts) +
+      kpi("Handed to dispatch", s.handoffs, g.handoffs) + kpi("Loads booked", s.loads, g.loads) + moneyKpi("Earned this month", ms, g.monthlyEarnings);
+
+    const all = [...leads.values()];
+    const due = all.filter((l) => ["due", "overdue"].includes(followState(l))).sort(byFollow);
+    $("due-count").textContent = due.length ? `${due.length} lead${due.length > 1 ? "s" : ""}` : "";
+    $("due-list").innerHTML = due.length ? due.map((l) => rowHtml(l, `<span class="chip ${followState(l)}">${followState(l) === "overdue" ? "Overdue " + fmtDay(l.nextFollowUp) : "Today"}</span>${stageChip(l.stage)}`)).join("")
+      : `<li class="empty">${leads.size ? "Nothing due. Set a follow-up date on a lead and it shows up here." : "No leads yet. Add one or import a list to get started."}</li>`;
+
+    const fresh = all.filter((l) => l.stage === "new").sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    $("new-count").textContent = fresh.length ? `${fresh.length} waiting` : "";
+    $("new-list").innerHTML = fresh.length ? fresh.slice(0, 12).map((l) => rowHtml(l, `${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}`)).join("")
+      : `<li class="empty">Every lead has been contacted.</li>`;
+
+    const disp = all.filter((l) => l.stage === "handed_off" || l.stage === "quoted").sort((a, b) => (a.handedOffAt || "").localeCompare(b.handedOffAt || ""));
+    $("disp-count").textContent = disp.length ? `${disp.length} open` : "";
+    $("disp-list").innerHTML = disp.length ? disp.map((l) => rowHtml(l, `${stageChip(l.stage)}<span class="muted" style="font-size:12px">since ${esc(fmtDay((l.handedOffAt || "").slice(0, 10)) || "?")}</span>`)).join("")
+      : `<li class="empty">Nothing with dispatch right now. Check back with dispatch on each handoff until it's booked or lost.</li>`;
+  }
+
+  function renderPipeline() {
+    const cols = STAGES.filter((s) => s.id !== "lost");
+    const all = [...leads.values()];
+    $("pipe-count").textContent = `${all.filter((l) => l.stage !== "lost").length} active`;
+    $("board").innerHTML = cols.map((s) => {
+      const items = all.filter((l) => l.stage === s.id).sort(byFollow);
+      return `<div class="col"><div class="col-head"><h3>${esc(s.label)}</h3><span class="num muted">${items.length}</span></div>
+        ${items.length ? items.map((l) => {
+          const fs = followState(l);
+          return `<button class="card" type="button" data-open="${esc(l.id)}"><span class="name">${esc(l.company || "Untitled lead")}</span>
+            <span class="meta">${esc([l.freight, l.location].filter(Boolean).join(" · "))}</span>
+            <span class="tags">${l.example ? '<span class="chip example">Example</span>' : ""}${fs === "overdue" ? `<span class="chip overdue">Overdue</span>` : fs === "due" ? `<span class="chip due">Today</span>` : l.nextFollowUp && fs ? `<span class="chip">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}${s.id === "booked" ? `<span class="chip s-booked">${(l.loads || []).length} load${(l.loads || []).length === 1 ? "" : "s"}</span>` : ""}</span></button>`;
+        }).join("") : `<div class="empty">None</div>`}</div>`;
+    }).join("");
+    const lost = all.filter((l) => l.stage === "lost").length;
+    $("lost-note").textContent = lost ? `${lost} lost lead${lost > 1 ? "s" : ""} not shown. Find them under All leads.` : "";
+  }
+
+  function fillSelect(el, label, values, keep) {
+    const cur = keep ?? el.value;
+    el.innerHTML = `<option value="">${esc(label)}</option>` + values.map((v) => `<option value="${esc(v.value ?? v)}">${esc(v.label ?? v)}</option>`).join("");
+    el.value = [...el.options].some((o) => o.value === cur) ? cur : "";
+  }
+  function renderLeads() {
+    const sources = [...new Set([...leads.values()].map((l) => l.source).filter(Boolean))].sort();
+    fillSelect($("f-stage"), "All stages", STAGES.map((s) => ({ value: s.id, label: s.label })));
+    fillSelect($("f-freight"), "All freight", FREIGHT);
+    fillSelect($("f-source"), "All sources", sources);
+    const q = $("f-search").value.trim().toLowerCase();
+    const st = $("f-stage").value, fr = $("f-freight").value, so = $("f-source").value;
+    const rows = [...leads.values()].filter((l) =>
+      (!st || l.stage === st) && (!fr || l.freight === fr) && (!so || l.source === so) &&
+      (!q || [l.company, l.contactName, l.contactTitle, l.location, l.notes, l.phone, l.email].some((v) => (v || "").toLowerCase().includes(q)))
+    ).sort((a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage] || (a.company || "").localeCompare(b.company || ""));
+    $("lead-rows").innerHTML = rows.length ? rows.map((l) => `<tr data-open="${esc(l.id)}" tabindex="0">
+      <td><b>${esc(l.company || "Untitled lead")}</b>${l.example ? ' <span class="chip example">Example</span>' : ""}${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
+      <td>${esc(l.contactName)}${l.contactTitle ? `<div class="muted" style="font-size:13px">${esc(l.contactTitle)}</div>` : ""}</td>
+      <td>${stageChip(l.stage)}</td><td>${esc(l.freight)}</td><td>${esc(l.source)}</td>
+      <td>${l.nextFollowUp ? `<span class="chip ${followState(l) === "overdue" ? "overdue" : followState(l) === "due" ? "due" : ""}">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}</td>
+      <td class="r num">${(l.loads || []).length || ""}</td></tr>`).join("")
+      : `<tr><td colspan="7" class="empty">${leads.size ? "No leads match these filters." : "No leads yet. Add one or import a list."}</td></tr>`;
+  }
+
+  function weekChart() {
+    const start = weekStart(new Date());
+    const weeks = [];
+    for (let i = 7; i >= 0; i--) { const f = addDays(start, -7 * i); const s = stats(f, addDays(f, 7)); weeks.push({ f, h: s.handoffs, l: s.loads }); }
+    const max = Math.max(4, ...weeks.map((w) => Math.max(w.h, w.l)));
+    const step = Math.ceil(max / 4);
+    const top = step * 4;
+    const W = 640, H = 220, L = 34, R = 8, T = 12, B = 30;
+    const cw = (W - L - R) / weeks.length;
+    const y = (v) => T + (H - T - B) * (1 - v / top);
+    let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Handoffs and loads booked per week for the last 8 weeks">`;
+    for (let v = 0; v <= top; v += step) {
+      svg += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+      svg += `<text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${v}</text>`;
+    }
+    weeks.forEach((w, i) => {
+      const x0 = L + i * cw, bw = Math.min(18, cw * 0.32);
+      const cx = x0 + cw / 2;
+      const bar = (v, x, color) => v > 0 ? `<rect x="${x}" y="${y(v)}" width="${bw}" height="${y(0) - y(v)}" rx="2" fill="${color}"><title>${v}</title></rect>` : "";
+      svg += bar(w.h, cx - bw - 1, "var(--accent)") + bar(w.l, cx + 1, "var(--good)");
+      svg += `<text x="${cx}" y="${H - 10}" text-anchor="middle" font-size="11" fill="${i === weeks.length - 1 ? "var(--ink)" : "var(--muted)"}" font-family="Barlow, sans-serif">${w.f.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</text>`;
+    });
+    return svg + "</svg>";
+  }
+
+  function renderScore() {
+    document.querySelectorAll("[data-range]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.range === range)));
+    const s = stats(...rangeBounds(range));
+    const g = settings.goals || {};
+    const wk = range === "week";
+    const earnGoal = range === "month" ? g.monthlyEarnings : null;
+    $("kpis-score").innerHTML = kpi("New leads", s.added, wk ? g.leads : null) + kpi("Contacts made", s.contacts, wk ? g.contacts : null) +
+      kpi("Handed to dispatch", s.handoffs, wk ? g.handoffs : null) + kpi("Loads booked", s.loads, wk ? g.loads : null) +
+      moneyKpi(range === "week" ? "Earned this week" : range === "month" ? "Earned this month" : "Earned all time", s, earnGoal);
+    $("week-chart").innerHTML = weekChart();
+
+    const all = [...leads.values()];
+    const total = all.length || 1;
+    $("funnel").innerHTML = STAGES.map((st) => {
+      const n = all.filter((l) => l.stage === st.id).length;
+      return `<div class="fstep"><span>${esc(st.label)}</span><span class="fbar"><i style="width:${(n / total) * 100}%;${st.id === "booked" ? "background:var(--good)" : st.id === "lost" ? "background:var(--bad)" : ""}"></i></span><span class="r num">${n}</span></div>`;
+    }).join("") + (() => {
+      const handed = all.filter((l) => l.handedOffAt).length;
+      const booked = all.filter((l) => (l.loads || []).length || l.stage === "booked").length;
+      const contacted = all.filter((l) => l.stage !== "new").length;
+      const rate = (a, b) => (b ? Math.round((a / b) * 100) + "%" : "–");
+      return `<p class="help" style="margin:6px 0 0">Contacted leads handed to dispatch: <b class="num">${rate(handed, contacted)}</b> · Handoffs that booked: <b class="num">${rate(booked, handed)}</b></p>`;
+    })();
+
+    const bySource = new Map();
+    for (const l of all) {
+      const k = l.source || "Not set";
+      const r = bySource.get(k) || { leads: 0, handed: 0, booked: 0, margin: 0 };
+      r.leads++; if (l.handedOffAt) r.handed++; if ((l.loads || []).length || l.stage === "booked") r.booked++;
+      r.margin += (l.loads || []).reduce((t, x) => t + (x.margin || 0), 0);
+      bySource.set(k, r);
+    }
+    const rows = [...bySource.entries()].sort((a, b) => b[1].margin - a[1].margin || b[1].booked - a[1].booked || b[1].leads - a[1].leads);
+    $("source-rows").innerHTML = rows.length ? rows.map(([k, r]) => `<tr><td>${esc(k)}</td><td class="r num">${r.leads}</td><td class="r num">${r.handed}</td><td class="r num">${r.booked}</td><td class="r num">${money(r.margin)}</td></tr>`).join("")
+      : `<tr><td colspan="5" class="empty">Sources show up here once you have leads.</td></tr>`;
+  }
+
+  function fillGoalsForm() {
+    const g = settings.goals || {};
+    $("g-pct").value = settings.commissionPct ?? "";
+    $("g-leads").value = g.leads ?? ""; $("g-contacts").value = g.contacts ?? ""; $("g-handoffs").value = g.handoffs ?? "";
+    $("g-loads").value = g.loads ?? ""; $("g-earn").value = g.monthlyEarnings ?? "";
+  }
+
+  function renderMachine() {
+    const r = runs[0];
+    $("m-status").innerHTML = machine.paused ? `<span class="status-dot paused"></span>Paused` : r ? `<span class="status-dot ${r.status === "failed" ? "failed" : ""}"></span>Last run ${esc(fmtWhen(r.at))}` : "Waiting for its first run";
+    $("run-count").textContent = runs.length ? `${runs.length} recent` : "";
+    $("run-list").innerHTML = runs.length ? runs.map((x) => `<li>
+      <div class="brief-head"><b>${esc(fmtWhen(x.at))} · ${esc(x.slot || "run")}</b><span class="tags">${x.status && x.status !== "ok" ? `<span class="chip ${x.status === "failed" ? "overdue" : "due"}">${esc(x.status)}</span>` : ""}<span class="chip">${esc(x.newLeads ?? 0)} leads</span><span class="chip">${esc(x.touchesWritten ?? 0)} touches</span></span></div>
+      ${x.brief ? `<details><summary>Brief</summary><div class="brief-text" style="margin-top:6px">${esc(x.brief)}</div></details>` : ""}
+      ${x.problems ? `<div class="help">Problems: ${esc(x.problems)}</div>` : ""}</li>`).join("")
+      : `<li class="empty">No runs yet.</li>`;
+  }
+
+  function renderAll() {
+    const ex = [...leads.values()].some((l) => l.example);
+    $("example-banner").hidden = !ex;
+    if (view === "today") renderToday();
+    if (view === "pipeline") renderPipeline();
+    if (view === "leads") renderLeads();
+    if (view === "score") renderScore();
+    if (view === "machine") renderMachine();
+    if (openId && draft && !draft.isNew && leads.has(openId) && !sheetDirty) { draft = structuredClone(leads.get(openId)); renderSheet(); }
+  }
+
+  function setView(v) {
+    view = v;
+    document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.view === v)));
+    document.querySelectorAll("section.view").forEach((s) => (s.hidden = s.id !== "view-" + v));
+    if (v === "goals") fillGoalsForm();
+    if (v === "machine" && !machineDirty) fillMachineForm();
+    renderAll();
+  }
+
+  // ---------- lead sheet ----------
+  let sheetDirty = false;
+  let confirmingDelete = false;
+
+  function openLead(id) {
+    const l = id ? leads.get(id) : null;
+    draft = l ? structuredClone(l) : blankLead();
+    openId = draft.id; sheetDirty = false; confirmingDelete = false;
+    $("scrim").hidden = false; $("sheet").hidden = false;
+    renderSheet();
+    setTimeout(() => (draft.isNew ? $("d-company") : $("sheet-close"))?.focus(), 30);
+  }
+  function closeSheet() { openId = null; draft = null; $("scrim").hidden = true; $("sheet").hidden = true; }
+
+  function handoffText(l) {
+    return [
+      `New lead for dispatch from Kyle Duncan`,
+      `Company: ${l.company || ""}`,
+      `Contact: ${[l.contactName, l.contactTitle].filter(Boolean).join(", ")}`,
+      `Phone: ${l.phone || ""}`,
+      `Email: ${l.email || ""}`,
+      `Location: ${l.location || ""}`,
+      `Freight: ${l.freight || ""}`,
+      l.notes ? `Notes: ${l.notes}` : "",
+    ].filter(Boolean).join("\n");
+  }
+
+  function field(id, label, value, opts = {}) {
+    const attrs = `id="d-${id}" data-k="${id}" ${opts.type ? `type="${opts.type}"` : ""} ${opts.placeholder ? `placeholder="${esc(opts.placeholder)}"` : ""} ${opts.list ? `list="${opts.list}"` : ""}`;
+    if (opts.select) return `<div class="field ${opts.wide ? "wide" : ""}"><label for="d-${id}">${esc(label)}</label><select ${attrs}><option value="">Choose</option>${opts.select.map((v) => `<option ${v === value ? "selected" : ""}>${esc(v)}</option>`).join("")}</select></div>`;
+    if (opts.area) return `<div class="field wide"><label for="d-${id}">${esc(label)}</label><textarea ${attrs}>${esc(value)}</textarea></div>`;
+    return `<div class="field ${opts.wide ? "wide" : ""}"><label for="d-${id}">${esc(label)}</label><input ${attrs} value="${esc(value)}"></div>`;
+  }
+
+  function renderSheet() {
+    const l = draft;
+    const loadsMargin = (l.loads || []).reduce((t, x) => t + (x.margin || 0), 0);
+    const pct = num(settings.commissionPct);
+    const sources = [...new Set([...SOURCES, ...[...leads.values()].map((x) => x.source).filter(Boolean)])];
+    $("sheet").innerHTML = `
+      <div class="sheet-head">
+        <div style="min-width:0;display:grid;gap:6px">
+          <span class="eyebrow">${l.isNew ? "New lead" : "Lead"}</span>
+          <h2 id="sheet-title">${esc(l.company || "New lead")}</h2>
+          <div class="tags">${stageChip(l.stage)}${l.example ? '<span class="chip example">Example</span>' : ""}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}</div>
+        </div>
+        <button class="btn" id="sheet-close" type="button">Close</button>
+      </div>
+      <div class="sheet-body">
+        ${l.isNew ? "" : `<div class="block"><h3>Stage</h3>
+          <div class="stepper">${STAGES.map((s) => `<button type="button" data-stage="${s.id}" aria-pressed="${l.stage === s.id}">${esc(s.label)}</button>`).join("")}</div>
+          ${l.stage === "lost" ? `<div class="field"><label for="d-lostReason">Why it was lost</label><input id="d-lostReason" data-k="lostReason" value="${esc(l.lostReason)}" placeholder="Rate, timing, went with another broker..."></div>` : ""}
+        </div>`}
+
+        ${!l.isNew && ["interested", "handed_off", "quoted"].includes(l.stage) ? `<div class="block handoff"><h3>${l.stage === "interested" ? "Ready to hand off?" : "Handoff to dispatch"}</h3>
+          ${l.stage === "interested" ? `<p class="help" style="margin:0">When they want a quote, copy this summary to dispatch and mark the lead With dispatch.</p>` : `<p class="help" style="margin:0">Handed off ${esc(fmtWhen(l.handedOffAt || l.updatedAt))}. Check back with dispatch until it's quoted, booked or lost.</p>`}
+          <pre id="handoff-text">${esc(handoffText(l))}</pre>
+          <div class="inline"><button class="btn" type="button" id="btn-copy-handoff">Copy summary</button>
+          ${l.stage === "interested" ? `<button class="btn amber" type="button" data-stage="handed_off">Mark handed to dispatch</button>` : ""}</div>
+          <div class="dispatch-line"><span>Dispatch</span><span class="num">${DISPATCH_PHONE}</span><button class="btn small" type="button" data-copy="${DISPATCH_PHONE}">Copy</button></div>
+          <div class="dispatch-line"><span class="num">${DISPATCH_EMAIL}</span><button class="btn small" type="button" data-copy="${DISPATCH_EMAIL}">Copy</button></div>
+        </div>` : ""}
+
+        ${l.research?.why ? `<div class="block"><h3>Why this lead</h3>
+          <div class="brief-text">${esc(l.research.why)}</div>
+          ${(l.research.evidence || []).length ? `<div class="help">Sources: ${(l.research.evidence || []).map((u) => /^https?:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 60))}</a>` : esc(u)).join(" · ")}</div>` : ""}
+        </div>` : ""}
+
+        ${!l.isNew && (l.touches || []).length ? `<div class="block" id="touch-block"><h3>Outreach sequence</h3>
+          ${OPEN_STAGES.has(l.stage) ? "" : `<p class="help" style="margin:0">This lead has moved past outreach, so the remaining touches are on hold.</p>`}
+          ${!l.email && (l.touches || []).some((t) => t.channel === "email" && t.status === "ready") ? `<p class="help" style="margin:0">No email address on file. Add one above before sending the email touches.</p>` : ""}
+          <div class="touches">${(l.touches || []).map((t) => {
+            const closed = t.status !== "ready";
+            const due = !closed && OPEN_STAGES.has(l.stage) && (t.due || todayStr()) <= todayStr();
+            return `<div class="touch ${due ? "is-due" : ""} ${closed ? "is-closed" : ""}" id="touch-${esc(t.id)}">
+              <div class="touch-head"><span class="tags">${channelChip(t.channel)}<span class="chip">Touch ${esc(t.n)}</span>${t.due ? `<span class="chip ${due ? "due" : ""}">${esc(fmtDay(t.due))}</span>` : ""}${t.status === "done" ? '<span class="chip s-booked">Done</span>' : t.status === "skipped" ? '<span class="chip">Skipped</span>' : ""}</span>
+                ${closed ? `<button class="btn small" type="button" data-touch-reopen="${esc(t.id)}">Reopen</button>` : `<span class="inline" style="flex:0 0 auto"><button class="btn small" type="button" data-touch-skip="${esc(t.id)}">Skip</button><button class="btn small primary" type="button" data-touch-done="${esc(t.id)}">Mark done</button></span>`}</div>
+              ${t.subject ? `<div class="touch-subj">${esc(t.subject)}</div>` : ""}
+              <pre class="touch-body">${esc(t.body || "")}</pre>
+              ${closed ? "" : `<div class="inline">${t.subject ? `<button class="btn small" type="button" data-touch-copy="subject" data-tid="${esc(t.id)}">Copy subject</button>` : ""}<button class="btn small" type="button" data-touch-copy="body" data-tid="${esc(t.id)}">Copy ${t.channel === "email" || t.channel === "linkedin" ? "message" : "script"}</button>${t.channel === "email" && l.email ? `<button class="btn small" type="button" data-copy="${esc(l.email)}">Copy ${esc(l.email)}</button>` : ""}${(t.channel === "call" || t.channel === "voicemail") && l.phone ? `<button class="btn small" type="button" data-copy="${esc(l.phone)}">Copy ${esc(l.phone)}</button>` : ""}</div>`}
+            </div>`;
+          }).join("")}</div>
+        </div>` : ""}
+
+        <div class="block"><h3>Company &amp; contact</h3>
+          <div class="form-grid">
+            ${field("company", "Company", l.company, { wide: true, placeholder: "Company name" })}
+            ${field("contactName", "Contact", l.contactName)}
+            ${field("contactTitle", "Title", l.contactTitle, { placeholder: "Logistics manager" })}
+            ${field("phone", "Phone", l.phone, { type: "tel" })}
+            ${field("email", "Email", l.email, { type: "email" })}
+            ${field("location", "City / location", l.location, { placeholder: "Pasadena, TX" })}
+            ${field("website", "Website", l.website)}
+            ${field("freight", "Freight", l.freight, { select: FREIGHT })}
+            ${field("source", "Lead source", l.source, { list: "source-list", placeholder: "Cold call, Referral..." })}
+            ${field("nextFollowUp", "Next follow-up", l.nextFollowUp, { type: "date" })}
+            ${field("notes", "Notes", l.notes, { area: true })}
+          </div>
+          <datalist id="source-list">${sources.map((s) => `<option value="${esc(s)}">`).join("")}</datalist>
+          <div class="inline">
+            <button class="btn primary" type="button" id="btn-save-lead">${l.isNew ? "Add lead" : "Save changes"}</button>
+            <button class="btn small" type="button" data-fu="1">Follow up tomorrow</button>
+            <button class="btn small" type="button" data-fu="3">In 3 days</button>
+            <button class="btn small" type="button" data-fu="7">Next week</button>
+          </div>
+        </div>
+
+        ${l.isNew ? "" : `
+        <div class="block"><h3>Log a touch</h3>
+          <div class="inline">
+            <select id="act-type" aria-label="Type">${Object.entries(CONTACT_TYPES).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+            <input id="act-text" placeholder="What happened? e.g. Left voicemail, spoke with PM" aria-label="What happened">
+            <button class="btn" type="button" id="btn-log">Log</button>
+          </div>
+          ${(l.activity || []).length ? `<ul class="timeline">${[...l.activity].reverse().map((a) => `<li><span class="when">${esc(fmtWhen(a.at))}</span><span><b>${esc(CONTACT_TYPES[a.type] || (a.type === "stage" ? "Stage" : a.type))}</b> ${esc(a.text)}</span></li>`).join("")}</ul>` : `<p class="help" style="margin:0">No touches logged yet. Calls, emails, texts and visits count toward your contacts goal.</p>`}
+        </div>
+
+        <div class="block"><h3>Loads booked</h3>
+          ${(l.loads || []).length ? `<div class="table-wrap"><table class="loads"><thead><tr><th>Date</th><th>Lane</th><th class="r">Revenue</th><th class="r">Margin</th><th></th></tr></thead><tbody>
+            ${l.loads.map((x, i) => `<tr><td class="num">${esc(fmtDay(x.date))}</td><td>${esc(x.lane)}</td><td class="r num">${x.revenue != null ? money(x.revenue) : ""}</td><td class="r num">${money(x.margin)}</td><td class="r"><button class="btn small danger" type="button" data-rmload="${i}" aria-label="Remove load">×</button></td></tr>`).join("")}
+            </tbody></table></div>
+            <p class="help" style="margin:0">Margin <b class="num">${money(loadsMargin)}</b>${pct != null ? ` · Your ${pct}%: <b class="num">${money(loadsMargin * pct / 100)}</b>` : ""}</p>` : `<p class="help" style="margin:0">When dispatch books a load from this lead, add it here with the margin they report.</p>`}
+          <div class="inline">
+            <input id="ld-date" type="date" value="${todayStr()}" aria-label="Load date">
+            <input id="ld-lane" placeholder="Lane, e.g. Pasadena TX to Tulsa OK" aria-label="Lane">
+            <input id="ld-rev" type="number" min="0" step="1" placeholder="Revenue $" aria-label="Revenue">
+            <input id="ld-margin" type="number" min="0" step="1" placeholder="Margin $" aria-label="Margin">
+            <button class="btn" type="button" id="btn-add-load">Add load</button>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="confirm">${confirmingDelete
+            ? `<span>Delete ${esc(l.company || "this lead")} for good?</span><button class="btn danger" type="button" id="btn-del-yes">Delete</button><button class="btn" type="button" id="btn-del-no">Keep</button>`
+            : `<button class="btn danger" type="button" id="btn-del">Delete lead</button>`}</div>
+        </div>`}
+      </div>`;
+  }
+
+  function readForm() {
+    $("sheet").querySelectorAll("[data-k]").forEach((el) => { draft[el.dataset.k] = el.value.trim(); });
+  }
+
+  function setStage(stage) {
+    readForm();
+    if (draft.stage === stage) return;
+    const prev = draft.stage;
+    draft.stage = stage;
+    draft.activity = [...(draft.activity || []), { at: nowIso(), type: "stage", text: `${STAGE_LABEL[prev]} → ${STAGE_LABEL[stage]}` }];
+    if (stage === "handed_off" && !draft.handedOffAt) draft.handedOffAt = nowIso();
+    if (stage === "contacted" && !draft.nextFollowUp) draft.nextFollowUp = ymd(addDays(new Date(), 3));
+    if (stage === "booked" && !draft.bookedAt) draft.bookedAt = nowIso();
+    if (stage === "booked" || stage === "lost") draft.nextFollowUp = "";
+    sheetDirty = false;
+    saveLead(structuredClone(draft));
+    renderSheet();
+    toast(`Moved to ${STAGE_LABEL[stage]}`);
+    if (stage === "booked" && !(draft.loads || []).length) setTimeout(() => $("ld-lane")?.focus(), 30);
+  }
+
+  $("sheet").addEventListener("input", (e) => { if (e.target.dataset.k) sheetDirty = true; });
+  $("sheet").addEventListener("click", (e) => {
+    const t = e.target.closest("button");
+    if (!t) return;
+    if (t.id === "sheet-close") return closeSheet();
+    if (t.dataset.copy) return copy(t.dataset.copy);
+    if (t.dataset.stage) return setStage(t.dataset.stage);
+    if (t.id === "btn-copy-handoff") { readForm(); return copy(handoffText(draft), "Summary copied. Paste it to dispatch."); }
+    if (t.dataset.fu) {
+      const d = ymd(addDays(new Date(), Number(t.dataset.fu)));
+      $("d-nextFollowUp").value = d; sheetDirty = true;
+      if (!draft.isNew) { readForm(); sheetDirty = false; saveLead(structuredClone(draft)); toast(`Follow-up set for ${fmtDay(d)}`); }
+      return;
+    }
+    if (t.id === "btn-save-lead") {
+      readForm();
+      if (!draft.company) { toast("Add a company name first."); $("d-company").focus(); return; }
+      const wasNew = draft.isNew;
+      if (wasNew) draft.createdAt = nowIso();
+      sheetDirty = false;
+      saveLead(structuredClone(draft));
+      delete draft.isNew;
+      renderSheet();
+      toast(wasNew ? "Lead added" : "Saved");
+      return;
+    }
+    if (t.id === "btn-log") {
+      const text = $("act-text").value.trim(); const type = $("act-type").value;
+      readForm();
+      draft.activity = [...(draft.activity || []), { at: nowIso(), type, text }];
+      if (draft.stage === "new" && COUNTS_AS_CONTACT.has(type)) {
+        draft.activity.push({ at: nowIso(), type: "stage", text: "New → Contacted" });
+        draft.stage = "contacted";
+        if (!draft.nextFollowUp) draft.nextFollowUp = ymd(addDays(new Date(), 3));
+      }
+      sheetDirty = false;
+      saveLead(structuredClone(draft)); renderSheet(); toast("Logged");
+      return;
+    }
+    if (t.id === "btn-add-load") {
+      const margin = num($("ld-margin").value);
+      if (margin == null) { toast("Enter the margin dispatch reported."); $("ld-margin").focus(); return; }
+      readForm();
+      draft.loads = [...(draft.loads || []), { date: $("ld-date").value || todayStr(), lane: $("ld-lane").value.trim(), revenue: num($("ld-rev").value), margin }];
+      if (draft.stage !== "booked") {
+        draft.activity = [...(draft.activity || []), { at: nowIso(), type: "stage", text: `${STAGE_LABEL[draft.stage]} → Booked` }];
+        draft.stage = "booked"; draft.nextFollowUp = "";
+      }
+      if (!draft.bookedAt) draft.bookedAt = nowIso();
+      if (!draft.handedOffAt) draft.handedOffAt = nowIso();
+      sheetDirty = false;
+      saveLead(structuredClone(draft)); renderSheet(); toast("Load added");
+      return;
+    }
+    if (t.dataset.rmload != null) {
+      readForm();
+      draft.loads = draft.loads.filter((_, i) => i !== Number(t.dataset.rmload));
+      sheetDirty = false;
+      saveLead(structuredClone(draft)); renderSheet(); return;
+    }
+    if (t.dataset.touchCopy) {
+      const tc = (draft.touches || []).find((x) => x.id === t.dataset.tid);
+      if (tc) copy(t.dataset.touchCopy === "subject" ? tc.subject || "" : tc.body || "", t.dataset.touchCopy === "subject" ? "Subject copied" : "Copied");
+      return;
+    }
+    if (t.dataset.touchDone || t.dataset.touchSkip || t.dataset.touchReopen) {
+      readForm();
+      const id = t.dataset.touchDone || t.dataset.touchSkip || t.dataset.touchReopen;
+      draft.touches = (draft.touches || []).map((x) => ({ ...x }));
+      const tc = draft.touches.find((x) => x.id === id);
+      if (!tc) return;
+      if (t.dataset.touchReopen) { tc.status = "ready"; tc.doneAt = null; }
+      else {
+        tc.status = t.dataset.touchDone ? "done" : "skipped"; tc.doneAt = nowIso();
+        if (t.dataset.touchDone) {
+          draft.activity = [...(draft.activity || []), { at: nowIso(), type: CHANNEL_ACTIVITY[tc.channel] || "note", text: `Touch ${tc.n}${tc.subject ? ": " + tc.subject : " (" + (CHANNEL_LABEL[tc.channel] || tc.channel) + ")"}` }];
+          if (draft.stage === "new") { draft.activity.push({ at: nowIso(), type: "stage", text: "New → Contacted" }); draft.stage = "contacted"; }
+        }
+        const next = draft.touches.filter((x) => x.status === "ready").sort((a, b) => (a.due || "").localeCompare(b.due || ""))[0];
+        if (next?.due) draft.nextFollowUp = next.due < todayStr() ? todayStr() : next.due;
+      }
+      sheetDirty = false;
+      saveLead(structuredClone(draft)); renderSheet();
+      toast(t.dataset.touchDone ? "Done. Next touch is scheduled." : t.dataset.touchSkip ? "Skipped" : "Reopened");
+      return;
+    }
+    if (t.id === "btn-del") { confirmingDelete = true; renderSheet(); return; }
+    if (t.id === "btn-del-no") { confirmingDelete = false; renderSheet(); return; }
+    if (t.id === "btn-del-yes") { const id = draft.id; closeSheet(); deleteLead(id); toast("Lead deleted"); return; }
+  });
+
+  // ---------- import ----------
+  function parseCsv(text) {
+    const rows = []; let row = [], f = "", q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) { if (c === '"' && text[i + 1] === '"') { f += '"'; i++; } else if (c === '"') q = false; else f += c; }
+      else if (c === '"') q = true;
+      else if (c === "," || c === "\t") { row.push(f); f = ""; }
+      else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(f); rows.push(row); row = []; f = ""; }
+      else f += c;
+    }
+    if (f || row.length) { row.push(f); rows.push(row); }
+    const clean = rows.filter((r) => r.some((v) => v.trim()));
+    const [head, ...body] = clean;
+    if (!head) return [];
+    const keys = head.map((h) => h.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_"));
+    return body.map((r) => Object.fromEntries(keys.map((k, i) => [k, (r[i] || "").trim()])));
+  }
+  const pick = (r, names) => { for (const n of names) if (r[n]) return r[n]; return ""; };
+  function guessFreight(s) {
+    const t = (s || "").toLowerCase();
+    if (/reefer|refrig|frozen|produce/.test(t)) return "Reefer";
+    if (/heavy|rgn|lowboy|oversize|step ?deck|flatbed|pipe|steel/.test(t)) return "Heavy haul";
+    if (/local/.test(t)) return "Local";
+    if (/long|otr|dry van|van/.test(t)) return "Long haul";
+    return t ? "Other" : "";
+  }
+  function rowToLead(r, source) {
+    const l = blankLead();
+    l.company = pick(r, ["company", "company_name", "name", "business", "account"]);
+    l.contactName = pick(r, ["contact_name", "contact", "first_last", "full_name"]);
+    l.contactTitle = pick(r, ["contact_title", "title", "job_title"]);
+    l.phone = pick(r, ["phone", "phone_number", "main_phone"]);
+    l.email = pick(r, ["email", "email_address"]);
+    const city = pick(r, ["city"]), state = pick(r, ["state"]);
+    l.location = pick(r, ["location"]) || [city, state].filter(Boolean).join(", ");
+    l.website = pick(r, ["website", "url", "domain"]);
+    const fr = pick(r, ["freight", "equipment", "likely_equipment", "freight_needed"]);
+    l.freight = FREIGHT.includes(fr) ? fr : guessFreight(fr);
+    l.source = pick(r, ["source", "lead_source"]) || source;
+    const extra = [
+      pick(r, ["event"]) && `Event: ${pick(r, ["event"])}`,
+      pick(r, ["buying_signal"]) && `Signal: ${pick(r, ["buying_signal"])}`,
+      pick(r, ["freight_needed", "what_they_ship"]) && `Ships: ${pick(r, ["freight_needed", "what_they_ship"])}`,
+      pick(r, ["angle"]) && `Opener: ${pick(r, ["angle"])}`,
+      pick(r, ["event_source", "signal_source"]) && `Source: ${pick(r, ["event_source", "signal_source"])}`,
+      pick(r, ["notes", "note"]),
+    ].filter(Boolean);
+    l.notes = extra.join("\n");
+    delete l.isNew;
+    return l;
+  }
+  let importRows = [];
+  function openImport() {
+    openId = "import"; draft = null;
+    $("scrim").hidden = false; $("sheet").hidden = false;
+    $("sheet").innerHTML = `
+      <div class="sheet-head"><div style="display:grid;gap:6px"><span class="eyebrow">Lead sources</span><h2 id="sheet-title">Import leads</h2></div>
+        <button class="btn" id="imp-close" type="button">Close</button></div>
+      <div class="sheet-body">
+        <div class="block"><h3>From a spreadsheet</h3>
+          <p class="help" style="margin:0">Paste rows copied from Excel or Google Sheets, or choose a CSV file. The first row must be column names. Columns like Company, Contact, Title, Phone, Email, City, State, Freight and Notes are picked up automatically, including the target lists from the hunting tool.</p>
+          <div class="field"><label for="imp-file">CSV file</label><input id="imp-file" type="file" accept=".csv,text/csv,.txt"></div>
+          <div class="field"><label for="imp-text">Or paste here</label><textarea id="imp-text" style="min-height:140px" placeholder="Company,Contact,Phone,City,State&#10;Example Steel,Jane Doe,713-555-0100,Pasadena,TX"></textarea></div>
+          <div class="field"><label for="imp-source">Lead source for these</label><input id="imp-source" list="imp-sources" value="Import"><datalist id="imp-sources">${SOURCES.map((s) => `<option value="${esc(s)}">`).join("")}</datalist></div>
+          <div class="inline"><button class="btn" type="button" id="imp-preview">Preview</button></div>
+          <div id="imp-result"></div>
+        </div>
+      </div>`;
+  }
+  function previewImport() {
+    const rows = parseCsv($("imp-text").value);
+    const source = $("imp-source").value.trim() || "Import";
+    const known = new Set([...leads.values()].map((l) => (l.company || "").toLowerCase()));
+    const seen = new Set();
+    importRows = [];
+    let dup = 0, blank = 0;
+    for (const r of rows) {
+      const l = rowToLead(r, source);
+      const k = l.company.toLowerCase();
+      if (!k) { blank++; continue; }
+      if (known.has(k) || seen.has(k)) { dup++; continue; }
+      seen.add(k); importRows.push(l);
+    }
+    $("imp-result").innerHTML = `<p style="margin:0"><b class="num">${importRows.length}</b> new lead${importRows.length === 1 ? "" : "s"} ready${dup ? `, ${dup} already on your desk skipped` : ""}${blank ? `, ${blank} rows with no company skipped` : ""}.</p>
+      ${importRows.length ? `<ul class="rows" style="max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:6px">${importRows.slice(0, 50).map((l) => `<li class="row" style="cursor:default"><span class="name">${esc(l.company)}</span><span class="meta">${esc([l.contactName, l.location, l.freight].filter(Boolean).join(" · "))}</span></li>`).join("")}</ul>
+      <div class="inline"><button class="btn primary" type="button" id="imp-go">Add ${importRows.length} lead${importRows.length === 1 ? "" : "s"}</button></div>` : ""}`;
+  }
+  async function runImport() {
+    const list = importRows; importRows = [];
+    closeSheet();
+    toast(`Adding ${list.length} leads...`);
+    for (const l of list) { l.createdAt = nowIso(); await saveLead(l); }
+    toast(`Added ${list.length} leads`);
+  }
+  $("sheet").addEventListener("click", (e) => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.id === "imp-close") closeSheet();
+    if (t.id === "imp-preview") previewImport();
+    if (t.id === "imp-go") runImport();
+  });
+  $("sheet").addEventListener("change", (e) => {
+    if (e.target.id !== "imp-file" || !e.target.files?.[0]) return;
+    const reader = new FileReader();
+    reader.onload = () => { $("imp-text").value = String(reader.result || ""); previewImport(); };
+    reader.readAsText(e.target.files[0]);
+  });
+
+  // ---------- wiring ----------
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => { setView(t.dataset.view); try { history.replaceState(null, "", "#" + t.dataset.view); } catch {} }));
+  document.querySelectorAll("[data-range]").forEach((b) => b.addEventListener("click", () => { range = b.dataset.range; renderScore(); }));
+  document.addEventListener("click", (e) => {
+    const o = e.target.closest("[data-open]");
+    if (o && !e.target.closest("#sheet")) {
+      openLead(o.dataset.open);
+      if (o.dataset.touchFocus) setTimeout(() => $("touch-" + o.dataset.touchFocus)?.scrollIntoView({ block: "start", behavior: "smooth" }), 60);
+    }
+    const c = e.target.closest("[data-copy]");
+    if (c && !e.target.closest("#sheet")) copy(c.dataset.copy);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("sheet").hidden) closeSheet();
+    if (e.key === "Enter" && e.target.matches?.("[data-open]") && !e.target.closest("#sheet") && e.target.tagName !== "BUTTON") openLead(e.target.dataset.open);
+  });
+  $("scrim").addEventListener("click", closeSheet);
+  $("btn-add").addEventListener("click", () => openLead(null));
+  $("btn-import").addEventListener("click", openImport);
+  ["f-search", "f-stage", "f-freight", "f-source"].forEach((id) => $(id).addEventListener("input", renderLeads));
+  $("btn-save-machine").addEventListener("click", saveMachine);
+  ["m-paused", "m-per-run", "m-area", "m-focus", "m-notes"].forEach((id) => $(id).addEventListener("input", () => (machineDirty = true)));
+  $("btn-save-goals").addEventListener("click", () => {
+    settings = { ...settings, commissionPct: num($("g-pct").value),
+      goals: { leads: num($("g-leads").value), contacts: num($("g-contacts").value), handoffs: num($("g-handoffs").value), loads: num($("g-loads").value), monthlyEarnings: num($("g-earn").value) } };
+    saveSettings();
+  });
+  const EXAMPLE_ASK = `<button class="btn small" id="btn-clear-examples" type="button">Remove examples</button>`;
+  $("example-actions").addEventListener("click", async (e) => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.id === "btn-clear-examples") {
+      $("example-actions").innerHTML = `<span>Remove all example leads?</span><button class="btn small danger" id="ex-yes" type="button">Remove</button><button class="btn small" id="ex-no" type="button">Keep</button>`;
+    } else if (t.id === "ex-no") {
+      $("example-actions").innerHTML = EXAMPLE_ASK;
+    } else if (t.id === "ex-yes") {
+      const ids = [...leads.values()].filter((l) => l.example).map((l) => l.id);
+      for (const id of ids) await deleteLead(id);
+      $("example-actions").innerHTML = EXAMPLE_ASK;
+      toast("Examples removed");
+    }
+  });
+
+  const start = (location.hash || "").replace("#", "");
+  setView(["today", "pipeline", "leads", "score", "machine", "goals"].includes(start) ? start : "today");
+  connect();
+})();
+</script>
