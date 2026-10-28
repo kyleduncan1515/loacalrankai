@@ -217,6 +217,10 @@ td.r, th.r { text-align: right; }
 .touch-subj { font-weight: 600; overflow-wrap: anywhere; }
 .touch-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; background: var(--sunk); border-radius: 6px; padding: 10px; margin: 0; font-family: var(--body); }
 .touches { display: grid; gap: 10px; }
+.touch textarea.touch-edit { min-height: 140px; font-family: var(--body); line-height: 1.45; resize: vertical; }
+.touch .field input, .touch .field textarea { background: var(--surface); }
+.send-hint { margin: 0; padding: 8px 10px; border-radius: 6px; background: var(--amber-soft); border: 1px solid var(--amber-line); font-size: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+a.btn { text-decoration: none; display: inline-flex; align-items: center; }
 .chip.ch-email { background: var(--accent-soft); }
 .chip.ch-call, .chip.ch-voicemail { background: var(--amber-soft); }
 .chip.ch-linkedin { background: var(--sunk); }
@@ -391,6 +395,14 @@ td.r, th.r { text-align: right; }
       <p class="help">Earnings on the scoreboard are the margin on loads your leads booked, times this percentage. Enter each load's margin as dispatch reports it.</p>
     </div>
     <div class="block">
+      <h3>Sending email</h3>
+      <div class="form-grid">
+        <div class="field"><label for="g-sendwith">Send with</label><select id="g-sendwith"><option value="gmail">Gmail (or Google Workspace)</option><option value="outlook">Outlook (work account)</option><option value="outlookcom">Outlook.com</option></select></div>
+        <div class="field"><label for="g-sendas">Your email</label><input id="g-sendas" type="email" placeholder="you@company.com"></div>
+      </div>
+      <p class="help">Open in Gmail opens a filled-in email in this account, ready for you to review and send. When your company email is ready, change it here.</p>
+    </div>
+    <div class="block">
       <h3>Weekly goals</h3>
       <div class="form-grid">
         <div class="field"><label for="g-leads">New leads</label><input id="g-leads" type="number" min="0"></div>
@@ -438,7 +450,8 @@ td.r, th.r { text-align: right; }
   const COUNTS_AS_CONTACT = new Set(["call", "email", "text", "linkedin", "visit"]);
   const DISPATCH_PHONE = "832-644-1690";
   const DISPATCH_EMAIL = "Summit-Dispatch@summittransitllc.com";
-  const DEFAULT_SETTINGS = { commissionPct: null, goals: { leads: 25, contacts: 50, handoffs: 5, loads: 2, monthlyEarnings: null } };
+  const DEFAULT_SETTINGS = { commissionPct: null, sendWith: "gmail", sendAs: "kyleduncan1515@gmail.com", goals: { leads: 25, contacts: 50, handoffs: 5, loads: 2, monthlyEarnings: null } };
+  const SEND_WITH = { gmail: "Gmail", outlook: "Outlook", outlookcom: "Outlook.com" };
 
   // ---------- state ----------
   let db = null;
@@ -796,6 +809,7 @@ td.r, th.r { text-align: right; }
   function fillGoalsForm() {
     const g = settings.goals || {};
     $("g-pct").value = settings.commissionPct ?? "";
+    $("g-sendwith").value = settings.sendWith || "gmail"; $("g-sendas").value = settings.sendAs || "";
     $("g-leads").value = g.leads ?? ""; $("g-contacts").value = g.contacts ?? ""; $("g-handoffs").value = g.handoffs ?? "";
     $("g-loads").value = g.loads ?? ""; $("g-earn").value = g.monthlyEarnings ?? "";
   }
@@ -819,7 +833,8 @@ td.r, th.r { text-align: right; }
     if (view === "leads") renderLeads();
     if (view === "score") renderScore();
     if (view === "machine") renderMachine();
-    if (openId && draft && !draft.isNew && leads.has(openId) && !sheetDirty) { draft = structuredClone(leads.get(openId)); renderSheet(); }
+    const typing = document.activeElement && $("sheet").contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (openId && draft && !draft.isNew && leads.has(openId) && !sheetDirty && !typing && !quietSheet) { draft = structuredClone(leads.get(openId)); renderSheet(); }
   }
 
   function setView(v) {
@@ -865,6 +880,17 @@ td.r, th.r { text-align: right; }
     return `<div class="field ${opts.wide ? "wide" : ""}"><label for="d-${id}">${esc(label)}</label><input ${attrs} value="${esc(value)}"></div>`;
   }
 
+  let quietSheet = false;
+  function saveQuietly() { readForm(); quietSheet = true; try { saveLead(structuredClone(draft)); } finally { quietSheet = false; } }
+  function composeUrl(to, subject, body) {
+    const e = encodeURIComponent;
+    const w = settings.sendWith || "gmail";
+    if (w === "outlook") return `https://outlook.office.com/mail/deeplink/compose?to=${e(to || "")}&subject=${e(subject || "")}&body=${e(body || "")}`;
+    if (w === "outlookcom") return `https://outlook.live.com/mail/0/deeplink/compose?to=${e(to || "")}&subject=${e(subject || "")}&body=${e(body || "")}`;
+    return `https://mail.google.com/mail/?${settings.sendAs ? `authuser=${e(settings.sendAs)}&` : ""}view=cm&fs=1&to=${e(to || "")}&su=${e(subject || "")}&body=${e(body || "")}`;
+  }
+  const openedCompose = new Set();
+
   function renderSheet() {
     const l = draft;
     const loadsMargin = (l.loads || []).reduce((t, x) => t + (x.margin || 0), 0);
@@ -909,9 +935,16 @@ td.r, th.r { text-align: right; }
             return `<div class="touch ${due ? "is-due" : ""} ${closed ? "is-closed" : ""}" id="touch-${esc(t.id)}">
               <div class="touch-head"><span class="tags">${channelChip(t.channel)}<span class="chip">Touch ${esc(t.n)}</span>${t.due ? `<span class="chip ${due ? "due" : ""}">${esc(fmtDay(t.due))}</span>` : ""}${t.status === "done" ? '<span class="chip s-booked">Done</span>' : t.status === "skipped" ? '<span class="chip">Skipped</span>' : ""}</span>
                 ${closed ? `<button class="btn small" type="button" data-touch-reopen="${esc(t.id)}">Reopen</button>` : `<span class="inline" style="flex:0 0 auto"><button class="btn small" type="button" data-touch-skip="${esc(t.id)}">Skip</button><button class="btn small primary" type="button" data-touch-done="${esc(t.id)}">Mark done</button></span>`}</div>
-              ${t.subject ? `<div class="touch-subj">${esc(t.subject)}</div>` : ""}
-              <pre class="touch-body">${esc(t.body || "")}</pre>
-              ${closed ? "" : `<div class="inline">${t.subject ? `<button class="btn small" type="button" data-touch-copy="subject" data-tid="${esc(t.id)}">Copy subject</button>` : ""}<button class="btn small" type="button" data-touch-copy="body" data-tid="${esc(t.id)}">Copy ${t.channel === "email" || t.channel === "linkedin" ? "message" : "script"}</button>${t.channel === "email" && l.email ? `<button class="btn small" type="button" data-copy="${esc(l.email)}">Copy ${esc(l.email)}</button>` : ""}${(t.channel === "call" || t.channel === "voicemail") && l.phone ? `<button class="btn small" type="button" data-copy="${esc(l.phone)}">Copy ${esc(l.phone)}</button>` : ""}</div>`}
+              ${closed ? `${t.subject ? `<div class="touch-subj">${esc(t.subject)}</div>` : ""}<pre class="touch-body">${esc(t.body || "")}</pre>` : `
+                ${t.channel === "email" ? `<div class="field"><label for="tt-to-${esc(t.id)}">To</label><input id="tt-to-${esc(t.id)}" class="touch-to" type="email" value="${esc(l.email)}" placeholder="Add their email address"></div>
+                <div class="field"><label for="tt-subj-${esc(t.id)}">Subject</label><input id="tt-subj-${esc(t.id)}" data-tedit="subject" data-tid="${esc(t.id)}" value="${esc(t.subject)}"></div>` : ""}
+                <div class="field"><label for="tt-body-${esc(t.id)}">${t.channel === "email" || t.channel === "linkedin" ? "Message" : "Script"}</label><textarea id="tt-body-${esc(t.id)}" class="touch-edit" data-tedit="body" data-tid="${esc(t.id)}" rows="${Math.min(20, Math.max(6, (t.body || "").split("\n").length + 1))}">${esc(t.body || "")}</textarea></div>
+                <div class="inline">
+                  ${t.channel === "email" ? `<a class="btn small primary" href="${esc(composeUrl(l.email, t.subject, t.body))}" target="_blank" rel="noopener" data-compose="${esc(t.id)}">Open in ${esc(SEND_WITH[settings.sendWith] || "Gmail")}</a>` : ""}
+                  ${t.subject ? `<button class="btn small" type="button" data-touch-copy="subject" data-tid="${esc(t.id)}">Copy subject</button>` : ""}<button class="btn small" type="button" data-touch-copy="body" data-tid="${esc(t.id)}">Copy ${t.channel === "email" || t.channel === "linkedin" ? "message" : "script"}</button>${(t.channel === "call" || t.channel === "voicemail") && l.phone ? `<button class="btn small" type="button" data-copy="${esc(l.phone)}">Copy ${esc(l.phone)}</button>` : ""}
+                </div>
+                ${openedCompose.has(t.id) ? `<p class="send-hint"><span>Sent it from ${esc(SEND_WITH[settings.sendWith] || "Gmail")}?</span><button class="btn small primary" type="button" data-touch-done="${esc(t.id)}">Yes, mark done</button></p>` : ""}
+                <span class="help">Edits save when you click away.</span>`}
             </div>`;
           }).join("")}</div>
         </div>` : ""}
@@ -992,7 +1025,37 @@ td.r, th.r { text-align: right; }
     if (stage === "booked" && !(draft.loads || []).length) setTimeout(() => $("ld-lane")?.focus(), 30);
   }
 
-  $("sheet").addEventListener("input", (e) => { if (e.target.dataset.k) sheetDirty = true; });
+  $("sheet").addEventListener("input", (e) => {
+    if (e.target.dataset.k) sheetDirty = true;
+    if (!draft || !draft.touches) return;
+    if (e.target.dataset.tedit) {
+      const tc = draft.touches.find((x) => x.id === e.target.dataset.tid);
+      if (tc) { tc[e.target.dataset.tedit] = e.target.value; tc.edited = true; }
+    } else if (e.target.classList.contains("touch-to")) {
+      draft.email = e.target.value.trim();
+      const main = $("d-email"); if (main) main.value = draft.email;
+      $("sheet").querySelectorAll(".touch-to").forEach((x) => { if (x !== e.target) x.value = draft.email; });
+    } else return;
+    $("sheet").querySelectorAll("a[data-compose]").forEach((a) => {
+      const tc = draft.touches.find((x) => x.id === a.dataset.compose);
+      if (tc) a.href = composeUrl(draft.email, tc.subject, tc.body);
+    });
+  });
+  $("sheet").addEventListener("change", (e) => {
+    if (!draft || draft.isNew || !(e.target.dataset.tedit || e.target.classList.contains("touch-to"))) return;
+    saveQuietly();
+    toast("Saved");
+  });
+  $("sheet").addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-compose]");
+    if (!a || !draft) return;
+    const tc = draft.touches.find((x) => x.id === a.dataset.compose);
+    if (tc) a.href = composeUrl(draft.email, tc.subject, tc.body);
+    if (!draft.email) toast("No address in To yet. Add it in the email window before sending.");
+    if (tc?.edited) saveQuietly();
+    openedCompose.add(a.dataset.compose);
+    setTimeout(renderSheet, 400);
+  });
   $("sheet").addEventListener("click", (e) => {
     const t = e.target.closest("button");
     if (!t) return;
@@ -1233,7 +1296,7 @@ td.r, th.r { text-align: right; }
   });
   ["m-paused", "m-per-run", "m-area", "m-focus", "m-notes"].forEach((id) => $(id).addEventListener("input", () => (machineDirty = true)));
   $("btn-save-goals").addEventListener("click", () => {
-    settings = { ...settings, commissionPct: num($("g-pct").value),
+    settings = { ...settings, commissionPct: num($("g-pct").value), sendWith: $("g-sendwith").value, sendAs: $("g-sendas").value.trim(),
       goals: { leads: num($("g-leads").value), contacts: num($("g-contacts").value), handoffs: num($("g-handoffs").value), loads: num($("g-loads").value), monthlyEarnings: num($("g-earn").value) } };
     saveSettings();
   });
