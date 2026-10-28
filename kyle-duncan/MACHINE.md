@@ -61,7 +61,7 @@ For each company, find out:
 ```
 Call the main line: <number, or "find it on <website>/contact">
 Script: Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble. I'm hoping you can point me in the right direction. Who handles shipping or trucking for your <location> <plant/DC/site>? ... Thank you. Could I get their name and the best email to send them a short note?
-If you're put through: use the t2 call script.
+If you're put through: use the call script in Touch 3.
 After the call: add the name and email under Company & contact so the emails fill in.
 ```
 Give `t0` `n: 1` and number the rest 2 to 7 in order.
