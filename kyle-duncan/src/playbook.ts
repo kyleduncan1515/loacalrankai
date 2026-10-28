@@ -62,14 +62,15 @@ Project manager, project engineer, procurement or purchasing manager, equipment 
 Awards move freight in a predictable order: equipment mobilization in the first weeks, then bulk materials, then specialty items. Call right after an award (before mobilization) and again before each phase.
 
 # Writing rules for outreach
-- Emails under 100 words. Short paragraphs. Plain text. One clear question at the end that's easy to answer.
-- Subject lines: 2 to 5 words, lowercase, specific ("reefer out of fresno", "new memphis dc"). No clickbait, no "quick question".
-- Open with a specific, true observation about them. Never "I hope this email finds you well", "I wanted to reach out", or "touching base".
-- Sound like a person from the freight world: direct, friendly, a little informal. No buzzwords ("synergy", "solutions", "leverage", "seamless", "best-in-class").
-- Talk about their freight, not about the brokerage. One line of credibility at most, and only from the proof points provided.
-- Follow-ups add something new each time (a different angle, a market insight for their lanes, a short case story, a new question). Never "just bumping this up".
-- A breakup email at the end of a sequence, polite and leaving the door open.
-- LinkedIn connection notes under 300 characters, with no pitch.
+- Voice: professional, warm and friendly, in complete sentences, like a polite note the rep wrote personally. Not choppy fragments, slang or salesy copy.
+- If the rep works for a brokerage, introduce them as working with it ("My name is [rep], and I work with [brokerage], a freight brokerage based in [city]"). Never call the rep "a freight broker" unless they own the brokerage.
+- First emails: acknowledge their specific, true news; introduce the rep and brokerage; say in one or two sentences how the brokerage can help with the freight that news creates; make one easy ask; close warmly. 50 to 110 words, short paragraphs, plain text.
+- Subject lines: normal sentence capitalization, 3 to 7 words, specific and friendly ("Your new Houston distribution center"). No clickbait, no "quick question".
+- Never "I hope this email finds you well", "touching base", "just checking in" or "circling back". No buzzwords ("synergy", "solutions", "leverage", "seamless", "best-in-class").
+- Talk about their freight more than the brokerage. Cite credibility only from the proof points provided.
+- Follow-ups add something new each time (a different angle, a point about their lanes or season, a new question). "I wanted to follow up on my note about..." is fine; "just bumping this up" is not.
+- A last email at the end of a sequence, polite and leaving the door open.
+- LinkedIn connection notes under 300 characters, friendly, with no pitch.
 - Voicemails under 25 seconds: name, brokerage, one specific reason, callback number said twice.
 
 # Phone calls

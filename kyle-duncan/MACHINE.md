@@ -55,32 +55,66 @@ Write six touches per lead. Due dates are business days (Monday to Friday) count
 
 | Touch | Day | Channel | What it is |
 |---|---|---|---|
-| t1 | 0 | email | First email: one specific, true observation about their trigger, why it creates freight, and an easy question. |
+| t1 | 0 | email | First email: acknowledge their news, introduce Kyle and Summit, how Summit can help with that freight, the dispatch ask. |
 | t2 | 2 | call | Call script: permission-based opener, the reason for the call in one line, 2–3 discovery questions specific to them, the ask, and a voicemail under 25 seconds at the end. |
 | t3 | 4 | email | Follow-up with a new angle (the next phase of their job, a lane, an equipment type, a seasonal point). Never "just bumping this". |
 | t4 | 6 | linkedin | Connection note under 300 characters. No pitch. |
 | t5 | 9 | call | Second call: a different opener, plus a voicemail. |
 | t6 | 13 | email | Breakup email: polite and short, door left open. |
 
-Writing rules (from the playbook):
-- Emails under 100 words, not counting the signature and footer. Subject lines are 2–5 words, lowercase and specific. Plain text, sounding like a busy person in freight.
-- Open with their trigger, not with Summit. Never write "I hope this finds you well", "touching base" or "just checking in".
-- The ask is always the same small step: call Summit dispatch at 832-644-1690 with one lane and they'll quote it. Frame it as low commitment (one lane, backup coverage when a carrier falls off). Never say dispatch quotes "instantly" or "on the spot", and never ask them to send the lane to Kyle.
-- Call scripts end with the same ask ("call our dispatch at 832-644-1690 with a lane"), offering to have dispatch call them if they prefer. Voicemails give the dispatch number twice.
-- Sign emails:
+Writing rules. These override the playbook's writing section wherever they differ.
+
+**Voice.** Write the way Kyle writes: professional, warm and friendly, in complete sentences, like a polite note from a real person. Not choppy fragments, not slang, not salesy. Kyle **works for** Summit Transit; he is not a broker himself. Introduce him as "My name is Kyle Duncan, and I work with Summit Transit, a freight brokerage based in Humble." Never write "I'm a freight broker" or "I'm a broker". In calls, voicemails and LinkedIn notes, say "with Summit Transit, a freight brokerage in Humble."
+
+**First email (t1)** follows this shape:
+1. "Hi <first name>," or "Hi there,"
+2. One or two sentences acknowledging their news, specifically and genuinely ("I read that ... Congratulations, that's a big step.").
+3. Who Kyle is (the line above), then one or two sentences on how Summit could help with the freight their news creates, naming the real equipment or kind of load, plus backup coverage when a regular carrier falls through.
+4. The ask: "If you have a lane you'd like priced, our dispatch team can put a quote together for you at 832-644-1690 or Summit-Dispatch@summittransitllc.com."
+5. A warm close tied to their news ("Thanks for your time, and best of luck with the expansion.")
+
+Here is a first email in the right voice. Match its tone and length, but never copy its facts:
+
+```
+Subject: Congratulations on the Houston expansion
+
+Hi there,
+
+I read that PV Hardware is adding 34,200 square feet to your Houston plant. Congratulations, that's a big step.
+
+My name is Kyle Duncan, and I work with Summit Transit, a freight brokerage based in Humble. As your output grows, we'd be glad to help move it, whether that's flatbed or step deck loads to project sites or backup coverage when one of your regular carriers falls through.
+
+If you have a lane you'd like priced, our dispatch team can put a quote together for you at 832-644-1690 or Summit-Dispatch@summittransitllc.com.
+
+Thanks for your time, and best of luck with the expansion.
+```
+
+**Follow-up (t3):** open with "I wanted to follow up on my note about ...", add one new, useful point (the next phase of their work, a lane, an equipment type, a seasonal crunch), mention that Summit uses vetted carriers and someone stays with every load until it delivers, then the same dispatch ask. Close with "Thank you,".
+
+**Last email (t6):** "I don't want to fill up your inbox, so this will be my last note for now." Then one sentence pointing to dispatch for a second option, and a kind sign-off about their news.
+
+**All emails:**
+- 50–110 words, not counting the signature and footer. Short paragraphs.
+- Subject lines in normal sentence capitalization, 3–7 words, specific and friendly ("Your new Houston distribution center", "Lanes out of the Houston DC", "One last note"). No clickbait.
+- Never write "I hope this finds you well", "touching base", "just checking in", "circling back", or buzzwords ("synergy", "solutions", "leverage", "seamless", "best-in-class").
+- The ask always points to Summit's dispatch, never back to Kyle. Never ask them to mention Kyle's name or say who referred them. Never say dispatch quotes "instantly" or "on the spot".
+- Sign every email, then add the footer:
   ```
   Kyle Duncan
   Summit Transit LLC
+  Dispatch: 832-644-1690
   kyleduncan1515@gmail.com
-  For a quote, call our dispatch at 832-644-1690 or email Summit-Dispatch@summittransitllc.com.
-  ```
-  Below the signature, add this footer:
-  ```
+
   Summit Transit LLC · PO Box 398, Humble, TX 77347
-  If you'd rather not hear from me, reply and I won't reach out again.
+  If you'd rather not hear from me, just reply and let me know.
   ```
   Read Kyle's current email from `summit-transit.json` (`rep.email`) and dispatch's phone and email (`brokerage.phone`, `brokerage.email`) in case they've changed.
-- Address a person by first name when you know it; otherwise write so the greeting reads naturally without a name ("Hi there,").
+
+**Calls (t2, t5):** keep the playbook's honest opener, a one-line reason tied to their news ("Summit helps shippers cover ..."), 2–3 specific questions, and the ask: their next lane can go to our dispatch at 832-644-1690 for a quote, or we can have dispatch call them. Voicemails run under 25 seconds: "Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble," the reason, and the dispatch number said twice. Write calls in plain, friendly spoken language.
+
+**LinkedIn (t4):** under 300 characters, friendly, no pitch: "Hi, I'm Kyle with Summit Transit, a freight brokerage in Humble. Congratulations on ... I'd be glad to connect."
+
+- Address a person by first name when you know it; otherwise use "Hi there,".
 
 ### 6. Write to the desk
 Use one `ArtifactData` `batch` (up to 50 writes). New documents only, so omit `if_version`.
