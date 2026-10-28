@@ -278,7 +278,7 @@ td.r, th.r { text-align: right; }
   <section class="view" id="view-today" hidden>
     <div id="brief-box"></div>
     <div>
-      <div class="sec-head"><h2>Outreach due</h2><span class="count" id="touch-count"></span></div>
+      <div class="sec-head"><h2>Outreach due</h2><span class="inline" style="flex:0 1 auto"><span class="count" id="touch-count"></span><button class="btn small" type="button" id="btn-dispatch-list">Copy today's list for dispatch</button></span></div>
       <div class="panel"><ul class="rows" id="touch-list"></ul></div>
     </div>
     <div>
@@ -1212,6 +1212,25 @@ td.r, th.r { text-align: right; }
   $("btn-import").addEventListener("click", openImport);
   ["f-search", "f-stage", "f-freight", "f-source"].forEach((id) => $(id).addEventListener("input", renderLeads));
   $("btn-save-machine").addEventListener("click", saveMachine);
+  $("btn-dispatch-list").addEventListener("click", () => {
+    const t = todayStr();
+    const touched = [];
+    for (const l of leads.values()) {
+      if (l.example) continue;
+      const acts = (l.activity || []).filter((a) => COUNTS_AS_CONTACT.has(a.type) && a.at && ymd(new Date(a.at)) === t);
+      if (acts.length) touched.push({ l, how: [...new Set(acts.map((a) => CONTACT_TYPES[a.type] || a.type))].join(", ") });
+    }
+    if (!touched.length) { toast("No contacts logged today yet. Mark touches done and they'll show up in the list."); return; }
+    touched.sort((a, b) => (a.l.company || "").localeCompare(b.l.company || ""));
+    const lines = touched.map(({ l, how }, i) => {
+      const who = [l.contactName, l.contactTitle].filter(Boolean).join(", ");
+      return `${i + 1}. ${l.company}${l.location ? " (" + l.location + ")" : ""}` +
+        (who ? `\n   Contact: ${who}` : "") + (l.phone ? `\n   Phone: ${l.phone}` : "") + (l.email ? `\n   Email: ${l.email}` : "") +
+        (l.freight ? `\n   Freight: ${l.freight}` : "") + `\n   Reached by: ${how}`;
+    });
+    const head = `Kyle Duncan: companies contacted ${new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })} (${touched.length})`;
+    copy(head + "\n\n" + lines.join("\n\n"), `Copied ${touched.length} compan${touched.length === 1 ? "y" : "ies"}. Paste it to dispatch.`);
+  });
   ["m-paused", "m-per-run", "m-area", "m-focus", "m-notes"].forEach((id) => $(id).addEventListener("input", () => (machineDirty = true)));
   $("btn-save-goals").addEventListener("click", () => {
     settings = { ...settings, commissionPct: num($("g-pct").value),
