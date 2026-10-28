@@ -34,6 +34,12 @@ List `leads` (limit 1000). Note every company name, normalized to lowercase with
 Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. Use web search and web fetch. Rotate your sources so the shifts don't repeat themselves:
 
 - **Morning shift: awards and projects.** Recent public contract awards (federal awards on USAspending.gov and SAM.gov, TxDOT lettings and low bidders, Harris County and other county commissioners court awards, City of Houston, Port Houston, METRO, school districts, water and utility authorities) and newly announced construction, energy, petrochemical, LNG, pipeline and industrial projects. Follow the freight to whoever controls the trucks: the prime, a subcontractor, a material supplier, or the owner.
+
+  Start the morning shift with new federal contract awards straight from USAspending's free public API (no key needed). Run this with today's date and 30 days back, once for Harris County (`201`) and again for the other Houston-area counties (Fort Bend `157`, Montgomery `339`, Brazoria `039`, Galveston `167`), and try NAICS `23` (construction), `21` (oil, gas and mining) and `31`–`33` (manufacturing):
+  ```
+  curl -sS -X POST https://api.usaspending.gov/api/v2/search/spending_by_award/ -H 'content-type: application/json' -d '{"filters":{"award_type_codes":["A","B","C","D"],"time_period":[{"start_date":"<30 days ago>","end_date":"<today>","date_type":"new_awards_only"}],"place_of_performance_locations":[{"country":"USA","state":"TX","county":"201"}],"naics_codes":{"require":["23"]},"award_amounts":[{"lower_bound":250000}]},"fields":["Award ID","Recipient Name","Award Amount","Description","Awarding Agency","Start Date","generated_internal_id"],"limit":25,"sort":"Award Amount","order":"desc"}'
+  ```
+  The award's source URL is `https://www.usaspending.gov/award/<generated_internal_id>`. Skip awards that create no freight (pure services, IT, consulting, staffing). For the ones that do, follow the freight: the winner, its subcontractors and its material suppliers. Then hunt local awards and projects on the web.
 - **Afternoon shift: shippers with a fresh signal.** New or expanding plants, warehouses and distribution centers; manufacturers and distributors hiring logistics or shipping staff; food, produce and beverage shippers heading into a peak; importers moving freight off Port Houston; building materials and steel suppliers.
 
 Prefer the last 30 days. Favor fit with Summit's services (local, long haul, heavy haul, reefer) and closeness to Houston.
