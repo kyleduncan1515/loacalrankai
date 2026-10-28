@@ -45,13 +45,22 @@ For each company, find out:
 - what they ship and which freight type fits: exactly one of `Local`, `Long haul`, `Heavy haul`, `Reefer`, `Other`
 - the trigger (what happened, when, and the source URL), what freight it creates, and when that freight moves
 - who to talk to: a name if it's published, otherwise the title (project manager, procurement, logistics or shipping manager, plant manager, owner at a small company)
-- the company's published main phone number and published contact email, if any. Look on the company's own website (contact, locations and about pages), its press releases (media contacts don't count; you want the business line), and its business listings. A lead Kyle can't reach is worth little, so try hard here, and when two targets are otherwise equal, pick the one you can reach.
+- the company's published main phone number and published contact email, if any. Look on the company's own website (contact, locations and about pages), its press releases (media contacts don't count; you want the business line), and its business listings. Free places that often name a person: county, city, TxDOT and other public award documents and bid tabulations (they often list the contractor's contact person, phone and email), job postings that name a hiring manager, and a company's own team or locations page. Use only free sources; never sign up for or pay for a data service. A lead Kyle can't reach is worth little, so try hard here, and when two targets are otherwise equal, pick the one you can reach.
 - how Kyle can find the right person: a ready-to-paste search string, e.g. `"PV Hardware" Houston (logistics OR "supply chain" OR shipping) manager site:linkedin.com`
 - city and state, and the website
 - a score from 1 to 10: size of the freight opportunity × fit for Summit × how fresh the trigger is
 
 ### 5. Write the outreach sequence
-Write six touches per lead. Due dates are business days (Monday to Friday) counted from the first touch. The first touch is due today on a morning shift and the next business day on an afternoon shift.
+**No email found? Call first.** If you couldn't find a published email for the right person, the sequence starts with an extra touch, `t0`, a call to the company's main line to find the right person. It's due on the first-touch day, and every other touch moves one business day later. Write `t0` as a short, friendly script:
+```
+Call the main line: <number, or "find it on <website>/contact">
+Script: Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble. I'm hoping you can point me in the right direction. Who handles shipping or trucking for your <location> <plant/DC/site>? ... Thank you. Could I get their name and the best email to send them a short note?
+If you're put through: use the t2 call script.
+After the call: add the name and email under Company & contact so the emails fill in.
+```
+Give `t0` `n: 1` and number the rest 2 to 7 in order.
+
+Then write six touches per lead. Due dates are business days (Monday to Friday) counted from the first touch. The first touch is due today on a morning shift and the next business day on an afternoon shift.
 
 | Touch | Day | Channel | What it is |
 |---|---|---|---|
