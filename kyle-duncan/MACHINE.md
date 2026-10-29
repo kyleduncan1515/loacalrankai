@@ -108,7 +108,7 @@ For each company, find out:
   - local news, business journal stories and press releases that quote a plant manager, operations leader or owner (media relations contacts don't count)
   - LinkedIn names and titles as they appear in web search results. Never log in to LinkedIn or scrape it.
 
-  Put the best person in `contactName` and `contactTitle`, and the link where you found them in `contactSource`. List anyone else useful in `otherContacts` (`[{ "name", "title", "phone", "email", "source" }]`), such as the owner plus the shipping manager. Confirm the person still works there when you can: a date on the source within the last two years, or a recent post or article. If you couldn't find a name, leave `contactName` empty and say why in `research.why`; the outreach then starts with the main-line call.
+  Put the best person in `contactName` and `contactTitle`, and the link where you found them in `contactSource`. List anyone else useful in `otherContacts` (`[{ "name", "title", "phone", "email", "source" }]`), such as the owner plus the shipping manager. Confirm the person still works there when you can: a date on the source within the last two years, or a recent post or article. If you couldn't find a name but did find a usable department or company email (see step 4c), leave `contactName` empty and say in `research.why` who the email likely reaches.
 - the company's published main phone number and published contact email, plus a person's direct line or email when it's published. **Never guess an email address from a pattern** (like first.last@company.com). Only use an email that appears in a source, and only that exact address. Use only free sources; never sign up for or pay for a data service. A lead Kyle can't reach is worth little, so try hard here, and when two targets are otherwise equal, pick the one you can reach.
 - how Kyle can find the right person: a ready-to-paste search string, e.g. `"PV Hardware" <city> (logistics OR "supply chain" OR shipping) manager site:linkedin.com`
 - city and state, and the website
@@ -128,7 +128,7 @@ Research, using free public sources only:
   - `red`: serious problems. Contact only if Kyle decides to, and explain why in `verdictReason`.
 - **Close score (1–10):** how easy this lead will be to close. 1 is a hard close, 10 is an easy close. Judge it on:
   - **Urgency:** a fresh award or project starting soon scores higher than a vague or far-off need.
-  - **Reachability:** a named decision-maker with a published email or direct line scores higher than a main line only.
+  - **Reachability:** a named decision-maker's own email scores higher than a department address, which scores higher than a general `info@` address.
   - **Size and formality:** a small or mid-size company that books its own trucks scores higher than a national firm with a procurement department and locked-in carrier contracts.
   - **Fleet:** a company that hauls with its own trucks scores lower, unless the job needs equipment it doesn't own (oversize, heavy haul, reefer, long haul).
   - **Fit:** freight that matches what Summit moves well (long haul anywhere in the US, Houston local, oversize, heavy haul, reefer) scores higher.
@@ -166,7 +166,8 @@ Research every candidate as deeply as the Harris County leads were researched: c
 A lead goes in the desk only if **all** of these are true:
 - **The reason to call is real and current.** It's confirmed by a primary source: the company's own site or press release, a government or court record, a permit, a DOT or utility record, or two independent news reports that agree. For the regular hunt the signal is from the last 90 days, or it's an older project that is clearly still active (shipping, building or hiring now). Niche leads need either a recent signal or clear evidence the company ships the niche's freight today.
 - **The company is alive.** A working website or recent activity (news, job posts, records from the last year). Not closed, sold off or in bankruptcy.
-- **There's a way in.** At least a confirmed main phone number from the company's own site or official listing, and you know which role to ask for. A named person or published email is better.
+- **There's a published email.** Kyle opens every lead with an email, never a cold call, so every lead needs a real email address published in a source: on the company's own site, in a public record or bid document, in a trade directory, a press release, a job post, or a business listing. Best is the named person who books trucks (the owner at a small company, or the shipping, logistics or operations manager). Next best is a department address that reaches people who handle freight or buying (`shipping@`, `logistics@`, `purchasing@`, `sales@` at a small company, or the owner's address). A general `info@` or `contact@` address counts only at a small company where it plainly reaches the owner or office. A contact form alone doesn't count, and neither does a media or PR address. **Never guess an email from a pattern.** No email, no lead: turn it away with the reason "No published email".
+- **There's also a phone number** from the company's own site or official listing, for the follow-up calls.
 - **Summit can win it.** It ships freight a broker can move (not all on its own fleet, unless the job needs equipment it doesn't have), and nothing suggests every load is locked into a national carrier contract or 3PL.
 - **The verdict isn't red.**
 - **The close score is at least `minCloseScore`.** Score honestly first, then apply the cutoff. Never raise a score to get a lead past the gate.
@@ -174,14 +175,7 @@ A lead goes in the desk only if **all** of these are true:
 If a candidate fails, don't add it. List it in the run document's `skipped` with the company, its score if you got that far, and the reason in a few words, so Kyle can see the homework. Then go find a better candidate. Big national and global companies (Fortune 1000, foreign multinationals, the big national contractors) rarely pass: their freight runs through procurement and contract carriers. Prefer small and mid-size companies where the person who books trucks is reachable.
 
 ### 5. Write the outreach sequence
-**No email found? Call first.** If you couldn't find a published email for the right person, the sequence starts with an extra touch, `t0`, a call to the company's main line to find the right person. It's due on the first-touch day, and every other touch moves one business day later. Write `t0` as a short, friendly script:
-```
-Call the main line: <number, or "find it on <website>/contact">
-Script: Hi, this is Kyle Duncan with Summit Transit. Could you point me in the right direction? Who handles shipping or trucking for your <location> <plant/DC/site>? ... Thank you. Could I get their name and the best email to send them a short note?
-If you're put through: use the call script in Touch 3.
-After the call: add the name and email under Company & contact so the emails fill in.
-```
-Give `t0` `n: 1` and number the rest 2 to 7 in order.
+**Every sequence opens with an email.** The quality gate guarantees one. Put the address in the lead's `email` field and the person in `contactName`. If the email is a department or general address, write the first email so it reads well for whoever opens it, and ask them to pass it to the person who handles shipping. Never start a sequence with a call.
 
 Then write six touches per lead. Due dates are business days (Monday to Friday) counted from the first touch. The first touch is due today on a morning shift and the next business day on an afternoon shift.
 
@@ -339,7 +333,7 @@ A separate weekly shift watches the leads Kyle already has. Companies win new wo
      "status": "new"
    }
    ```
-   - For an opportunity on a lead at `new`, `contacted` or `lost`, write a fresh, short sequence in `touches` built around the new news, following step 5's voice and rules: an email the next business day (or a call if there's no email), a call 2 business days later, and a last email 4 business days after that. If the lead was `contacted`, open the email with a natural reference back, such as "I reached out a few weeks ago about…". Give touch ids the `w<YYYYMMDD>-` prefix so they never collide with existing ones.
+   - For an opportunity on a lead at `new`, `contacted` or `lost`, write a fresh, short sequence in `touches` built around the new news, following step 5's voice and rules: an email the next business day (if the lead has no email, search for a published one first; if you can't find one, write the signal with no `touches` and say so in `detail`), a call 2 business days later, and a last email 4 business days after that. If the lead was `contacted`, open the email with a natural reference back, such as "I reached out a few weeks ago about…". Give touch ids the `w<YYYYMMDD>-` prefix so they never collide with existing ones.
    - For a lead at `interested`, `handed_off`, `quoted` or `booked`, write the signal with no `touches`; it's a heads-up for Kyle (for a booked customer, more freight to ask about).
    - For a `warning`, no `touches`; explain the risk in `detail`.
    - Only report what is confirmed in a source and new since the lead was created. No signal is better than a weak one.
