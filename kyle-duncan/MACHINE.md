@@ -40,6 +40,14 @@ Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. Use 
   curl -sS -X POST https://api.usaspending.gov/api/v2/search/spending_by_award/ -H 'content-type: application/json' -d '{"filters":{"award_type_codes":["A","B","C","D"],"time_period":[{"start_date":"<30 days ago>","end_date":"<today>","date_type":"new_awards_only"}],"place_of_performance_locations":[{"country":"USA","state":"TX","county":"201"}],"naics_codes":{"require":["23"]},"award_amounts":[{"lower_bound":250000}]},"fields":["Award ID","Recipient Name","Award Amount","Description","Awarding Agency","Start Date","generated_internal_id"],"limit":25,"sort":"Award Amount","order":"desc"}'
   ```
   The award's source URL is `https://www.usaspending.gov/award/<generated_internal_id>`. Skip awards that create no freight (pure services, IT, consulting, staffing). For the ones that do, follow the freight: the winner, its subcontractors and its material suppliers. Then hunt local awards and projects on the web.
+
+  Harris County's Commissioners Court records are free and official, through the Legistar API (no key). Search recent items for awards:
+  ```
+  curl -sS -G "https://webapi.legistar.com/v1/harriscountytx/matters" --data-urlencode "\$filter=substringof('award',MatterTitle) and MatterIntroDate ge datetime'<YYYY-MM-DD 30 days ago>'" --data-urlencode "\$orderby=MatterIntroDate desc" --data-urlencode "\$top=100"
+  ```
+  Look for "approval of an award ... to <contractor> in the amount of ...". Its source URL is `https://harriscountytx.legistar.com/LegislationDetail.aspx?ID=<MatterId>&GUID=<MatterGuid>`, and award PDFs are under `/matters/<MatterId>/attachments`. Those PDFs include the bid tabulation, which names every bidder; the other bidders on a civil job are good leads too. Change orders that add days to a contractor's job ("change in contract ... adding N calendar days") show work that is still active.
+
+  **Confirm county and city awards in the official record before using them.** Local news recap sites sometimes get awards wrong. If Legistar (or the city's equivalent) doesn't show the award, don't use it as the trigger.
 - **Afternoon shift: shippers with a fresh signal.** New or expanding plants, warehouses and distribution centers; manufacturers and distributors hiring logistics or shipping staff; food, produce and beverage shippers heading into a peak; importers moving freight off Port Houston; building materials and steel suppliers.
 
 Prefer the last 30 days. Favor fit with Summit's services (local, long haul, heavy haul, reefer) and closeness to Houston.
