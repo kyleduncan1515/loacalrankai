@@ -226,6 +226,13 @@ td.r, th.r { text-align: right; }
 .v-yellow { background: var(--amber-soft); color: var(--amber); }
 .v-red { background: var(--bad-soft); color: var(--bad); }
 .v-none { background: var(--sunk); color: var(--muted); }
+.close { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-family: var(--mono); }
+.close-easy { background: var(--good-soft); color: var(--good); }
+.close-mid { background: var(--amber-soft); color: var(--amber); }
+.close-hard { background: var(--bad-soft); color: var(--bad); }
+.close-meter { display: grid; gap: 6px; padding: 10px 12px; border-radius: 8px; background: var(--sunk); }
+.close-meter .bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.close-meter .bar i { display: block; height: 100%; border-radius: 4px; }
 .report p { margin: 0; max-width: 75ch; }
 .report details { border-top: 1px solid var(--line); padding-top: 8px; }
 .report summary { cursor: pointer; font-family: var(--display); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; font-size: 15px; list-style-position: outside; }
@@ -344,7 +351,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     </div>
     <div class="panel table-wrap">
       <table>
-        <thead><tr><th>Company</th><th>Vetting</th><th>Contact</th><th>Stage</th><th>Freight</th><th>Source</th><th>Next follow-up</th><th class="r">Loads</th></tr></thead>
+        <thead><tr><th>Company</th><th>Vetting</th><th class="r">Close</th><th>Contact</th><th>Stage</th><th>Freight</th><th>Source</th><th>Next follow-up</th><th class="r">Loads</th></tr></thead>
         <tbody id="lead-rows"></tbody>
       </table>
     </div>
@@ -615,7 +622,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   function dueTouches() {
     const t = todayStr(), out = [];
     for (const l of leads.values()) for (const tc of openTouches(l)) if ((tc.due || t) <= t) out.push({ l, tc });
-    return out.sort((a, b) => (a.tc.due || "").localeCompare(b.tc.due || "") || (b.l.research?.score || 0) - (a.l.research?.score || 0));
+    return out.sort((a, b) => (a.tc.due || "").localeCompare(b.tc.due || "") || (Number(b.l.report?.closeScore) || 0) - (Number(a.l.report?.closeScore) || 0) || (b.l.research?.score || 0) - (a.l.research?.score || 0));
   }
   function channelChip(c) { return `<span class="chip ch-${esc(c)}">${esc(CHANNEL_LABEL[c] || c)}</span>`; }
 
@@ -671,7 +678,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   function rowHtml(l, sideHtml) {
     const meta = [l.contactName && `${l.contactName}${l.contactTitle ? ", " + l.contactTitle : ""}`, l.location, l.freight].filter(Boolean).map(esc).join(" · ");
     return `<li class="row" tabindex="0" data-open="${esc(l.id)}">
-      <span class="name">${esc(l.company || "Untitled lead")}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.origin === "machine" ? ` <span class="chip machine">Machine${l.research?.score ? " · " + esc(l.research.score) : ""}</span>` : ""} ${verdictChip(l, true)}</span>
+      <span class="name">${esc(l.company || "Untitled lead")}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.origin === "machine" ? ` <span class="chip machine">Machine${l.research?.score ? " · " + esc(l.research.score) : ""}</span>` : ""} ${verdictChip(l, true)} ${closeChip(l)}</span>
       <span class="side">${sideHtml}</span>
       <span class="meta">${meta || "&nbsp;"}</span></li>`;
   }
@@ -695,7 +702,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       const late = tc.due && tc.due < todayStr();
       return `<li class="row" tabindex="0" data-open="${esc(l.id)}" data-touch-focus="${esc(tc.id)}">
         <span class="name">${esc(l.company || "Untitled lead")}${l.example ? ' <span class="chip example">Example</span>' : ""}</span>
-        <span class="side">${channelChip(tc.channel)}${late ? `<span class="chip overdue">Since ${esc(fmtDay(tc.due))}</span>` : ""}</span>
+        <span class="side">${closeChip(l)}${channelChip(tc.channel)}${late ? `<span class="chip overdue">Since ${esc(fmtDay(tc.due))}</span>` : ""}</span>
         <span class="meta">Touch ${esc(tc.n)} of ${total}${tc.subject ? " · " + esc(tc.subject) : ""}</span></li>`;
     }).join("") : `<li class="empty">${[...leads.values()].some((l) => (l.touches || []).length) ? "All caught up. New touches show up here on the day they're due." : "Nothing yet. When the machine adds leads, their emails, calls and follow-ups show up here on the day they're due."}</li>`;
     const [from, to] = rangeBounds("week");
@@ -734,7 +741,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
           const fs = followState(l);
           return `<button class="card" type="button" data-open="${esc(l.id)}"><span class="name">${esc(l.company || "Untitled lead")}</span>
             <span class="meta">${esc([l.freight, l.location].filter(Boolean).join(" · "))}</span>
-            <span class="tags">${verdictChip(l, true)}${l.example ? '<span class="chip example">Example</span>' : ""}${fs === "overdue" ? `<span class="chip overdue">Overdue</span>` : fs === "due" ? `<span class="chip due">Today</span>` : l.nextFollowUp && fs ? `<span class="chip">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}${s.id === "booked" ? `<span class="chip s-booked">${(l.loads || []).length} load${(l.loads || []).length === 1 ? "" : "s"}</span>` : ""}</span></button>`;
+            <span class="tags">${verdictChip(l, true)}${closeChip(l)}${l.example ? '<span class="chip example">Example</span>' : ""}${fs === "overdue" ? `<span class="chip overdue">Overdue</span>` : fs === "due" ? `<span class="chip due">Today</span>` : l.nextFollowUp && fs ? `<span class="chip">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}${s.id === "booked" ? `<span class="chip s-booked">${(l.loads || []).length} load${(l.loads || []).length === 1 ? "" : "s"}</span>` : ""}</span></button>`;
         }).join("") : `<div class="empty">None</div>`}</div>`;
     }).join("");
     const lost = all.filter((l) => l.stage === "lost").length;
@@ -756,15 +763,16 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     const rows = [...leads.values()].filter((l) =>
       (!st || l.stage === st) && (!fr || l.freight === fr) && (!so || l.source === so) &&
       (!q || [l.company, l.contactName, l.contactTitle, l.location, l.notes, l.phone, l.email].some((v) => (v || "").toLowerCase().includes(q)))
-    ).sort((a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage] || (a.company || "").localeCompare(b.company || ""));
+    ).sort((a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage] || (Number(b.report?.closeScore) || 0) - (Number(a.report?.closeScore) || 0) || (a.company || "").localeCompare(b.company || ""));
     $("lead-rows").innerHTML = rows.length ? rows.map((l) => `<tr data-open="${esc(l.id)}" tabindex="0">
       <td><b>${esc(l.company || "Untitled lead")}</b>${l.example ? ' <span class="chip example">Example</span>' : ""}${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
       <td>${verdictChip(l, false)}</td>
+      <td class="r">${closeChip(l) || '<span class="muted">–</span>'}</td>
       <td>${esc(l.contactName)}${l.contactTitle ? `<div class="muted" style="font-size:13px">${esc(l.contactTitle)}</div>` : ""}</td>
       <td>${stageChip(l.stage)}</td><td>${esc(l.freight)}</td><td>${esc(l.source)}</td>
       <td>${l.nextFollowUp ? `<span class="chip ${followState(l) === "overdue" ? "overdue" : followState(l) === "due" ? "due" : ""}">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}</td>
       <td class="r num">${(l.loads || []).length || ""}</td></tr>`).join("")
-      : `<tr><td colspan="8" class="empty">${leads.size ? "No leads match these filters." : "No leads yet. Add one or import a list."}</td></tr>`;
+      : `<tr><td colspan="9" class="empty">${leads.size ? "No leads match these filters." : "No leads yet. Add one or import a list."}</td></tr>`;
   }
 
   function weekChart() {
@@ -930,6 +938,11 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     if (!v) return small ? "" : `<span class="verdict v-none">Not vetted yet</span>`;
     return `<span class="verdict v-${esc(v)}" title="${esc(l.report.verdictReason || "")}">${esc(VERDICT[v] || v)}</span>`;
   }
+  function closeClass(n) { return n >= 7 ? "close-easy" : n >= 4 ? "close-mid" : "close-hard"; }
+  function closeChip(l) {
+    const n = Number(l.report?.closeScore);
+    return n ? `<span class="close ${closeClass(n)}" title="Ease of close: ${n}/10 (1 hard, 10 easy)${l.report.closeReason ? ". " + esc(l.report.closeReason) : ""}">Close ${n}/10</span>` : "";
+  }
   function srcLink(u) { return u && /^https?:\/\//.test(u) ? `<a class="src" href="${esc(u)}" target="_blank" rel="noopener">source</a>` : ""; }
   function reportHtml(l) {
     const r = l.report;
@@ -939,6 +952,9 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     return `<div class="block report" id="report-block">
       <div class="report-head"><h3>Vetting report</h3>${verdictChip(l)}</div>
       ${r.verdictReason ? `<p><b>${esc(r.verdictReason)}</b></p>` : ""}
+      ${Number(r.closeScore) ? `<div class="close-meter"><div class="brief-head"><span class="eyebrow">Ease of close</span><span class="close ${closeClass(Number(r.closeScore))}">${esc(r.closeScore)}/10</span></div>
+        <div class="bar"><i style="width:${Math.max(0, Math.min(10, Number(r.closeScore))) * 10}%;background:var(--${Number(r.closeScore) >= 7 ? "good" : Number(r.closeScore) >= 4 ? "amber-line" : "bad"})"></i></div>
+        ${r.closeReason ? `<span class="help">${esc(r.closeReason)}</span>` : ""}</div>` : ""}
       ${r.summary ? `<p>${esc(r.summary)}</p>` : ""}
       <details open><summary>Watch-outs<span class="count">${watch.length}</span></summary>
         ${watch.length ? `<ul>${[...watch].sort((a, b) => (order[a.level] ?? 3) - (order[b.level] ?? 3)).map((w) => `<li><span class="lvl lvl-${esc(w.level || "info")}">${esc(w.level || "info")}</span>${esc(w.text)}${srcLink(w.source)}</li>`).join("")}</ul>` : `<p class="help">Nothing found in public records.</p>`}
@@ -964,7 +980,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
         <div style="min-width:0;display:grid;gap:6px">
           <span class="eyebrow">${l.isNew ? "New lead" : "Lead"}</span>
           <h2 id="sheet-title">${esc(l.company || "New lead")}</h2>
-          <div class="tags">${stageChip(l.stage)}${verdictChip(l, true)}${l.example ? '<span class="chip example">Example</span>' : ""}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}</div>
+          <div class="tags">${stageChip(l.stage)}${verdictChip(l, true)}${closeChip(l)}${l.example ? '<span class="chip example">Example</span>' : ""}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}</div>
         </div>
         <button class="btn" id="sheet-close" type="button">Close</button>
       </div>

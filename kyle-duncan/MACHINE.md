@@ -77,6 +77,16 @@ Research, using free public sources only:
   - `green`: good to contact.
   - `yellow`: fine to contact, but know the watch-outs going in.
   - `red`: serious problems. Contact only if Kyle decides to, and explain why in `verdictReason`.
+- **Close score (1–10):** how easy this lead will be to close. 1 is a hard close, 10 is an easy close. Judge it on:
+  - **Urgency:** a fresh award or project starting soon scores higher than a vague or far-off need.
+  - **Reachability:** a named decision-maker with a published email or direct line scores higher than a main line only.
+  - **Size and formality:** a small or mid-size local company that books its own trucks scores higher than a national firm with a procurement department and locked-in carrier contracts.
+  - **Fleet:** a company that hauls with its own trucks scores lower, unless the job needs equipment it doesn't own (oversize, heavy haul, reefer, long haul).
+  - **Fit:** freight that matches what Summit moves well (Houston local, nationwide, oversize, heavy haul, reefer) scores higher.
+  - **Risk:** serious watch-outs (payment problems, lawsuits, terminated contracts) pull the score down.
+  - **Proximity:** a Houston-area company scores a little higher than one based far away.
+
+  Put the number in `closeScore` and one plain sentence explaining it in `closeReason`. Be honest; most leads land between 3 and 7.
 
 Never put watch-outs in the outreach. They're for Kyle only; the emails stay positive.
 
@@ -87,6 +97,8 @@ The report goes in the lead document as `report`:
 "report": {
   "verdict": "green | yellow | red",
   "verdictReason": "One sentence: why this verdict.",
+  "closeScore": 6,
+  "closeReason": "One sentence: why this lead is easy or hard to close.",
   "summary": "2-3 sentences: who they are and why they matter to Summit.",
   "story": "A short paragraph: founding, owners, size, what they do, ownership changes.",
   "pastWork": [ { "when": "2026", "what": "Inwood Forest detention basin excavation", "client": "Harris County Flood Control District", "value": "$6,576,337", "source": "https://..." } ],
@@ -153,21 +165,16 @@ Thank you for your time,
 **Last email (t6):** "I don't want to fill up your inbox, so this will be my last note for now." Then one sentence pointing to dispatch for a second option, and a kind sign-off about their news.
 
 **All emails:**
-- 50–140 words, not counting the signature and footer. Short paragraphs.
+- 50–140 words, not counting the footer. Short paragraphs.
 - Subject lines in normal sentence capitalization, 3–7 words, specific and friendly ("Your new Houston distribution center", "Lanes out of the Houston DC", "One last note"). No clickbait.
 - Never write "I hope this finds you well", "touching base", "just checking in", "circling back", or buzzwords ("synergy", "solutions", "leverage", "seamless", "best-in-class").
 - The ask always points to Summit's dispatch, never back to Kyle. Never ask them to mention Kyle's name or say who referred them. Never say dispatch quotes "instantly" or "on the spot".
-- Sign every email, then add the footer:
+- Don't sign the email. Kyle's email adds his signature automatically, so end with the close line ("Thank you for your time," or similar), a blank line, then the footer:
   ```
-  Kyle Duncan
-  Summit Transit LLC
-  Dispatch: 713-824-7168
-  kyleduncan1515@gmail.com
-
   Summit Transit LLC · PO Box 398, Humble, TX 77347
   If you'd rather not hear from me, just reply and let me know.
   ```
-  Read Kyle's current email from `summit-transit.json` (`rep.email`) and dispatch's phone and email (`brokerage.phone`, `brokerage.email`) in case they've changed.
+  Dispatch's phone and email still go in the body's ask. Read them from `summit-transit.json` (`brokerage.phone`, `brokerage.email`) in case they've changed.
 
 **Calls (t2, t5):** open with "Hi, this is Kyle Duncan with Summit Transit. I'll be brief. Do you have 30 seconds for me to tell you why I'm calling?" then a one-line reason tied to their news ("Summit helps shippers cover ..."), 2–3 specific questions, and the ask: their next lane can go to our dispatch at 713-824-7168 for a quote, or we can have dispatch call them. Voicemails run under 25 seconds: "Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble," the reason, and the dispatch number said twice. Write calls in plain, friendly spoken language.
 
