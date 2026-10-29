@@ -31,6 +31,16 @@ If `paused` is true, write the run document (step 6) with `status: "paused"`, `n
 ### 2. Read the desk
 List `leads` (limit 1000). Note every company name, normalized to lowercase with "inc", "llc", "co" and punctuation removed, so you never add one twice. Ignore leads with `example: true` for everything except duplicate checks. Count the outreach due today: touches with `status: "ready"` and `due` on or before today, on leads whose `stage` is `new` or `contacted`.
 
+**Learn Kyle's taste before you hunt.** Kyle rates leads in the desk. A lead's `rating` is `{ "value": "up" | "down", "reasons": [...], "note": "...", "at": "..." }`. Up reasons include "Right size", "Great freight fit", "Easy to reach", "Good timing"; down reasons include "Too big", "Wrong freight", "Hauls its own", "Can't reach anyone", "Stale news", "Not a real need". Also look at what happened to leads: `stage` `booked` (and the `loads` on them) and `handed_off` or `quoted` are what's working; `lost` with a `lostReason` is what isn't.
+
+From all of that, write yourself a short taste profile before hunting: which industries, company sizes, freight types, niches and signals Kyle likes, and which he turns down. Then use it:
+- Hunt more of what he rates up and what has booked loads. When a lead has booked loads, look for lookalikes: same industry, size and freight, in other places.
+- Avoid what he rates down. If he rated a kind of company "Too big", treat similar companies as failing the gate.
+- Calibrate your close scores. If he rated down a lead you scored 7, score its kind lower; if he rated up a 6, score its kind higher.
+- Kyle's ratings outrank your own judgment, and his most recent ratings outrank older ones.
+
+If there are no ratings yet, skip this. When the profile changed what you did, say so in one sentence in the brief (for example, "You've passed on big national companies, so I skipped three").
+
 ### 3. Hunt
 `newLeadsPerRun` is the standard Kyle expects every shift: that many leads, every one solid. A dead lead clogs his pipeline and wastes his calls, so every lead must pass the quality gate (step 4c) before it goes in the desk, and the gate never bends to hit the number. Instead, keep hunting: gather about twice as many candidates as you need, research them properly, and when some fail, go find more. Taking longer is fine. Keep going until `newLeadsPerRun` leads have passed, or until you have researched at least 4 times that many candidates (32 for the default of 8) without getting there. Hunt in `area`, following `focus` and `notes`. **Split them evenly between the regular hunt below and the niche hunt (3b):** half regular, half niche, and when the number is odd the extra one goes to the niche hunt. Use web search and web fetch. Summit works with shippers anywhere in the US, so when `area` is "Nationwide" (the default), hunt the whole country.
 
@@ -84,8 +94,17 @@ If `focus` or `notes` say to skip or favor a niche, follow that.
 For each company, find out:
 - what they ship and which freight type fits: exactly one of `Local`, `Long haul`, `Heavy haul`, `Reefer`, `Other`
 - the trigger (what happened, when, and the source URL), what freight it creates, and when that freight moves
-- who to talk to: a name if it's published, otherwise the title (project manager, procurement, logistics or shipping manager, plant manager, owner at a small company)
-- the company's published main phone number and published contact email, if any. Look on the company's own website (contact, locations and about pages), its press releases (media contacts don't count; you want the business line), and its business listings. Free places that often name a person: county, city, TxDOT and other public award documents and bid tabulations (they often list the contractor's contact person, phone and email), job postings that name a hiring manager, and a company's own team or locations page. Use only free sources; never sign up for or pay for a data service. A lead Kyle can't reach is worth little, so try hard here, and when two targets are otherwise equal, pick the one you can reach.
+- **who to talk to, by name.** Kyle wants to ask for a person, not "whoever handles shipping." Work hard to find the person who books trucks: the owner at a small company, otherwise the shipping, logistics, traffic or warehouse manager, the plant or operations manager, the yard or equipment manager, or the project manager on a construction job. Spend at least 6 searches on this for every lead. Free places that name people:
+  - the company's own site: team, about, leadership, locations and contact pages, and staff listed by branch
+  - job postings (on the company's careers page, or in search results from Indeed and LinkedIn) that name a hiring manager or say who the job reports to, such as "reports to the Shipping Manager"
+  - public award documents and bid tabulations, which often list the contractor's contact person, phone and email
+  - state contractor license lookups, which list the owner or qualifying person, and free state business records that list officers (in Texas, the Comptroller's franchise tax account search shows officers and directors for free)
+  - trade association member directories (for example NPCA for precast, the Equipment Dealers Association and state dealer associations, ASME and fabricator associations, AED), and chamber of commerce member listings
+  - local news, business journal stories and press releases that quote a plant manager, operations leader or owner (media relations contacts don't count)
+  - LinkedIn names and titles as they appear in web search results. Never log in to LinkedIn or scrape it.
+
+  Put the best person in `contactName` and `contactTitle`, and the link where you found them in `contactSource`. List anyone else useful in `otherContacts` (`[{ "name", "title", "phone", "email", "source" }]`), such as the owner plus the shipping manager. Confirm the person still works there when you can: a date on the source within the last two years, or a recent post or article. If you couldn't find a name, leave `contactName` empty and say why in `research.why`; the outreach then starts with the main-line call.
+- the company's published main phone number and published contact email, plus a person's direct line or email when it's published. **Never guess an email address from a pattern** (like first.last@company.com). Only use an email that appears in a source, and only that exact address. Use only free sources; never sign up for or pay for a data service. A lead Kyle can't reach is worth little, so try hard here, and when two targets are otherwise equal, pick the one you can reach.
 - how Kyle can find the right person: a ready-to-paste search string, e.g. `"PV Hardware" <city> (logistics OR "supply chain" OR shipping) manager site:linkedin.com`
 - city and state, and the website
 - a score from 1 to 10: size of the freight opportunity × fit for Summit × how fresh the trigger is
@@ -231,6 +250,8 @@ Use one `ArtifactData` `batch` (up to 50 writes). New documents only, so omit `i
   "company": "Gulf Coast Civil LLC",
   "contactName": "",
   "contactTitle": "Project manager",
+  "contactSource": "<link where you found the contact's name>",
+  "otherContacts": [ { "name": "", "title": "Owner", "phone": "", "email": "", "source": "https://..." } ],
   "phone": "<published main line or empty>",
   "email": "<published email or empty>",
   "location": "Galveston, TX",
@@ -289,3 +310,32 @@ Use `status: "ok"` when you added `newLeadsPerRun` leads, `"partial"` if you add
 
 ### 7. Check your work
 Read back the run document and one new lead with `ArtifactData` `get` to confirm they saved. End the shift with a two-line summary.
+
+
+## The watch shift (weekly)
+A separate weekly shift watches the leads Kyle already has. Companies win new work all the time, so a lead that was a 4 in October can be an 8 in March. When a scheduled run tells you it's the watch shift, do this instead of steps 3 to 5. The hard rules still apply: you only add documents.
+
+1. Read `settings/machine` (if `paused`, write the run with `slot: "watch"`, `status: "paused"` and stop), list `leads`, and list `signals` (limit 1000) so you don't report the same news twice.
+2. For every lead except examples, search for news since the lead was created or since its last signal: new contract awards (USAspending by recipient, the Legistar feeds, state DOT lettings), expansions, new plants or yards, acquisitions, big new customers, and hiring for drivers, shipping or logistics. Also watch for bad news: closures, layoffs, bankruptcy, lawsuits. Check at least 2 searches per lead; leads with `stage` `lost` count too.
+3. For each real, confirmed change, write a signal document to collection `signals`, doc id `sig-<YYYYMMDD>-<lead doc id>` (shortened to fit 200 characters):
+   ```json
+   {
+     "leadId": "<lead doc id>",
+     "company": "<company>",
+     "at": "<ISO timestamp>",
+     "kind": "opportunity | warning",
+     "headline": "One line: what changed.",
+     "detail": "2-3 sentences: what it means for Summit's freight.",
+     "sources": [ "https://..." ],
+     "closeScore": 7,
+     "closeReason": "One sentence, scored the same way as step 4b, given the new information.",
+     "touches": [ { "id": "w<YYYYMMDD>-t1", "n": 1, "channel": "email", "due": "YYYY-MM-DD", "subject": "...", "body": "...", "status": "ready", "doneAt": null } ],
+     "status": "new"
+   }
+   ```
+   - For an opportunity on a lead at `new`, `contacted` or `lost`, write a fresh, short sequence in `touches` built around the new news, following step 5's voice and rules: an email the next business day (or a call if there's no email), a call 2 business days later, and a last email 4 business days after that. If the lead was `contacted`, open the email with a natural reference back, such as "I reached out a few weeks ago about…". Give touch ids the `w<YYYYMMDD>-` prefix so they never collide with existing ones.
+   - For a lead at `interested`, `handed_off`, `quoted` or `booked`, write the signal with no `touches`; it's a heads-up for Kyle (for a booked customer, more freight to ask about).
+   - For a `warning`, no `touches`; explain the risk in `detail`.
+   - Only report what is confirmed in a source and new since the lead was created. No signal is better than a weak one.
+   - Kyle applies a signal from the desk, which reopens the lead with the new outreach. Never change the lead yourself.
+4. Write the run document with `slot: "watch"`, doc id `run-<YYYYMMDD>-watch`, `newLeads: 0`, `touchesWritten` (the touches in your signals), and a brief: how many leads you checked, how many signals you found, and the 3 best with one line each.

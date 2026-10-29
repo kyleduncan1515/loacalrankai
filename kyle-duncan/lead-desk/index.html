@@ -126,6 +126,16 @@ section.view { display: grid; gap: 22px; min-width: 0; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* Pipeline */
+.rate { display: flex; gap: 8px; flex-wrap: wrap; }
+.rate button, .reasons button { font: inherit; font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.reasons button { font-size: 13px; font-weight: 500; padding: 4px 10px; }
+.rate button[aria-pressed="true"].up, .chip.r-up { background: var(--good); color: #fff; border-color: var(--good); }
+.rate button[aria-pressed="true"].down, .chip.r-down { background: var(--bad); color: #fff; border-color: var(--bad); }
+.reasons { display: flex; gap: 6px; flex-wrap: wrap; }
+.reasons button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.signal { border: 1px solid var(--amber-line); background: var(--amber-soft); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.signal.warn { border-color: var(--bad); background: transparent; }
+.contacts-list { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
 .niche-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
 .niche { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; cursor: pointer; display: grid; gap: 4px; text-align: left; width: 100%; color: inherit; font: inherit; }
 .niche:hover { border-color: var(--accent); }
@@ -318,6 +328,10 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   <!-- TODAY -->
   <section class="view" id="view-today" hidden>
     <div id="brief-box"></div>
+    <div id="signals-wrap" hidden>
+      <div class="sec-head"><h2>News on your leads</h2><span class="count" id="signal-count"></span></div>
+      <div class="panel"><ul class="rows" id="signal-list"></ul></div>
+    </div>
     <div>
       <div class="sec-head"><h2>Outreach due</h2><span class="inline" style="flex:0 1 auto"><span class="count" id="touch-count"></span><button class="btn small" type="button" id="btn-dispatch-list">Copy today's list for dispatch</button></span></div>
       <div class="panel"><ul class="rows" id="touch-list"></ul></div>
@@ -416,7 +430,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   <section class="view" id="view-machine" hidden>
     <div class="block">
       <div class="brief-head"><h3>Machine status</h3><span id="m-status" class="muted"></span></div>
-      <p class="help" style="margin:0">The machine runs on its own every weekday around 6:40am and 12:40pm Houston time. Each run it hunts new freight leads anywhere in the US, rotating through six regions so every part of the country gets covered, researches every candidate in depth, keeps hunting until it has your full number of leads that pass its quality checks and score at or above your lowest close score, writes the full outreach sequence for each one into this desk, and leaves you a brief. It never sends anything or contacts anyone. You do that from <b>Outreach due</b> on the Today tab.</p>
+      <p class="help" style="margin:0">The machine runs on its own every weekday around 6:40am and 12:40pm Houston time. Each run it hunts new freight leads anywhere in the US, rotating through six regions so every part of the country gets covered, researches every candidate in depth, learns from your ratings, keeps hunting until it has your full number of leads that pass its quality checks and score at or above your lowest close score, writes the full outreach sequence for each one into this desk, and leaves you a brief. It never sends anything or contacts anyone. You do that from <b>Outreach due</b> on the Today tab.</p>
     </div>
     <div class="block">
       <h3>Controls</h3>
@@ -511,6 +525,9 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   let settings = structuredClone(DEFAULT_SETTINGS);
   let machine = structuredClone(DEFAULT_MACHINE);
   let runs = [];
+  const signals = new Map();
+  const UP_REASONS = ["Right size", "Great freight fit", "Easy to reach", "Good timing"];
+  const DOWN_REASONS = ["Too big", "Wrong freight", "Hauls its own", "Can't reach anyone", "Stale news", "Not a real need"];
   let view = "today";
   let range = "week";
   let openId = null;
@@ -617,6 +634,12 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       if (view === "machine" && !machineDirty) fillMachineForm();
       renderAll();
     }, (e) => console.error(e));
+    db.collection("signals").onSnapshot((snap) => {
+      signals.clear();
+      for (const doc of snap.docs) signals.set(doc.id, { ...structuredClone(doc.data()), id: doc.id });
+      renderAll();
+      if (openId && draft && !draft.isNew && !sheetDirty) renderSheet();
+    }, (e) => console.error(e));
     db.collection("runs").orderBy("at", "desc").limit(40).onSnapshot((snap) => {
       runs = snap.docs.map((d) => ({ ...structuredClone(d.data()), id: d.id }));
       renderAll();
@@ -717,8 +740,84 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       <div class="tags"><span class="chip">${esc(r.newLeads ?? 0)} new lead${r.newLeads === 1 ? "" : "s"}</span><span class="chip">${esc(r.touchesWritten ?? 0)} touches written</span></div></div>`;
   }
 
+  function ratingChip(l) {
+    const v = l.rating?.value;
+    return v === "up" ? '<span class="chip r-up">Good lead</span>' : v === "down" ? '<span class="chip r-down">Not for us</span>' : "";
+  }
+  function openSignals(leadId) {
+    return [...signals.values()].filter((g) => g.status === "new" && (!leadId || g.leadId === leadId) && leads.has(g.leadId))
+      .sort((a, b) => (b.at || "").localeCompare(a.at || ""));
+  }
+  async function saveSignal(g) {
+    signals.set(g.id, g);
+    renderAll();
+    if (!db) return;
+    const { id, ...data } = g;
+    try { await queue(id, () => db.collection("signals").doc(id).set(plain(data))); }
+    catch (e) { toast("Couldn't save: " + explain(e)); }
+  }
+  function applySignal(id) {
+    const g = signals.get(id);
+    if (!g || !draft || draft.id !== g.leadId) return;
+    readForm();
+    const prev = draft.stage;
+    const fresh = (g.touches || []).map((t) => ({ ...t, status: "ready", doneAt: null }));
+    if (fresh.length) {
+      draft.touches = [...(draft.touches || []).map((t) => (t.status === "ready" ? { ...t, status: "skipped" } : t)), ...fresh];
+      if (prev === "lost") { draft.stage = "new"; draft.lostReason = ""; }
+      draft.nextFollowUp = fresh.map((t) => t.due).filter(Boolean).sort()[0] || draft.nextFollowUp;
+    }
+    if (g.closeScore != null) draft.report = { ...(draft.report || {}), closeScore: g.closeScore, closeReason: g.closeReason || draft.report?.closeReason };
+    draft.activity = [...(draft.activity || []), { at: nowIso(), type: "note", text: `News: ${g.headline}` }, ...(draft.stage !== prev ? [{ at: nowIso(), type: "stage", text: `${STAGE_LABEL[prev]} → ${STAGE_LABEL[draft.stage]}` }] : [])];
+    sheetDirty = false;
+    saveLead(structuredClone(draft));
+    saveSignal({ ...g, status: "applied", resolvedAt: nowIso() });
+    renderSheet();
+    toast(fresh.length ? "Reopened with fresh outreach" : "Added to the lead");
+  }
+  function signalHtml(g) {
+    return `<div class="signal ${g.kind === "warning" ? "warn" : ""}">
+      <div class="tags"><span class="chip ${g.kind === "warning" ? "overdue" : "due"}">${g.kind === "warning" ? "Warning" : "New opportunity"}</span><span class="muted" style="font-size:12px">${esc(fmtWhen(g.at))}</span>${g.closeScore != null ? `<span class="chip">Close ${esc(g.closeScore)}/10 now</span>` : ""}</div>
+      <b>${esc(g.headline)}</b>
+      ${g.detail ? `<div class="brief-text">${esc(g.detail)}</div>` : ""}
+      ${(g.sources || []).length ? `<div class="help">Sources: ${(g.sources || []).map((u) => /^https?:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 60))}</a>` : esc(u)).join(" · ")}</div>` : ""}
+      <div class="inline">${(g.touches || []).length ? `<button class="btn small primary" type="button" data-signal-apply="${esc(g.id)}">Use it: reopen with ${g.touches.length} fresh touch${g.touches.length === 1 ? "" : "es"}</button>` : `<button class="btn small primary" type="button" data-signal-apply="${esc(g.id)}">Got it</button>`}<button class="btn small" type="button" data-signal-dismiss="${esc(g.id)}">Dismiss</button></div>
+    </div>`;
+  }
+  function ratingHtml(l) {
+    const r = l.rating || {};
+    const reasons = r.value === "up" ? UP_REASONS : r.value === "down" ? DOWN_REASONS : [];
+    return `<div class="block"><h3>Your rating</h3>
+      <p class="help" style="margin:0">Tell the machine if this is the kind of lead you want. It reads your ratings every shift and hunts more of what you like.</p>
+      <div class="rate"><button type="button" class="up" data-rate="up" aria-pressed="${r.value === "up"}">Good lead</button><button type="button" class="down" data-rate="down" aria-pressed="${r.value === "down"}">Not for us</button></div>
+      ${reasons.length ? `<div class="reasons">${reasons.map((x) => `<button type="button" data-reason="${esc(x)}" aria-pressed="${(r.reasons || []).includes(x)}">${esc(x)}</button>`).join("")}</div>
+      <div class="field"><label for="d-rating-note">Anything else? (optional)</label><input id="d-rating-note" value="${esc(r.note || "")}" placeholder="e.g. Love small fab shops like this"></div>` : ""}
+    </div>`;
+  }
+  function setRating(patch) {
+    readForm();
+    const cur = draft.rating || { reasons: [] };
+    draft.rating = { ...cur, ...patch, at: nowIso() };
+    saveQuietly();
+    renderSheet();
+  }
+  function contactsHtml(l) {
+    const others = (l.otherContacts || []).filter((c) => c && (c.name || c.title));
+    if (!l.contactSource && !others.length) return "";
+    const link = (u) => /^https?:\/\//.test(u || "") ? ` <a href="${esc(u)}" target="_blank" rel="noopener">source</a>` : "";
+    return `${l.contactSource ? `<div class="help">Where ${esc(l.contactName || "the contact")} was found:${link(l.contactSource)}</div>` : ""}
+      ${others.length ? `<div><div class="help" style="margin-bottom:4px">Other people to ask for</div><ul class="contacts-list">${others.map((c) => `<li><b>${esc(c.name || "Unnamed")}</b>${c.title ? `, ${esc(c.title)}` : ""}${c.phone ? ` · <span class="num">${esc(c.phone)}</span>` : ""}${c.email ? ` · ${esc(c.email)}` : ""}${link(c.source)}</li>`).join("")}</ul></div>` : ""}`;
+  }
+
   function renderToday() {
     $("brief-box").innerHTML = briefHtml();
+    const sg = openSignals();
+    $("signals-wrap").hidden = !sg.length;
+    $("signal-count").textContent = sg.length ? `${sg.length} new` : "";
+    $("signal-list").innerHTML = sg.map((g) => `<li class="row" tabindex="0" data-open="${esc(g.leadId)}">
+        <span class="name">${esc(leads.get(g.leadId)?.company || g.company || "Lead")}</span>
+        <span class="side"><span class="chip ${g.kind === "warning" ? "overdue" : "due"}">${g.kind === "warning" ? "Warning" : "Opportunity"}</span>${stageChip(leads.get(g.leadId)?.stage)}</span>
+        <span class="meta">${esc(g.headline)}</span></li>`).join("");
     const dt = dueTouches();
     $("touch-count").textContent = dt.length ? `${dt.length} to do` : "";
     $("touch-list").innerHTML = dt.length ? dt.map(({ l, tc }) => {
@@ -745,7 +844,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
 
     const fresh = all.filter((l) => l.stage === "new").sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
     $("new-count").textContent = fresh.length ? `${fresh.length} waiting` : "";
-    $("new-list").innerHTML = fresh.length ? fresh.slice(0, 12).map((l) => rowHtml(l, `${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}`)).join("")
+    $("new-list").innerHTML = fresh.length ? fresh.slice(0, 12).map((l) => rowHtml(l, `${ratingChip(l)}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}`)).join("")
       : `<li class="empty">Every lead has been contacted.</li>`;
 
     const disp = all.filter((l) => l.stage === "handed_off" || l.stage === "quoted").sort((a, b) => (a.handedOffAt || "").localeCompare(b.handedOffAt || ""));
@@ -789,7 +888,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       (!q || [l.company, l.contactName, l.contactTitle, l.location, l.notes, l.phone, l.email].some((v) => (v || "").toLowerCase().includes(q)))
     ).sort((a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage] || (Number(b.report?.closeScore) || 0) - (Number(a.report?.closeScore) || 0) || (a.company || "").localeCompare(b.company || ""));
     $("lead-rows").innerHTML = rows.length ? rows.map((l) => `<tr data-open="${esc(l.id)}" tabindex="0">
-      <td><b>${esc(l.company || "Untitled lead")}</b>${nicheChip(l)}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
+      <td><b>${esc(l.company || "Untitled lead")}</b>${nicheChip(l)}${ratingChip(l) ? " " + ratingChip(l) : ""}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
       <td>${verdictChip(l, false)}</td>
       <td class="r">${closeChip(l) || '<span class="muted">–</span>'}</td>
       <td>${esc(l.contactName)}${l.contactTitle ? `<div class="muted" style="font-size:13px">${esc(l.contactTitle)}</div>` : ""}</td>
@@ -1036,7 +1135,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
         <div style="min-width:0;display:grid;gap:6px">
           <span class="eyebrow">${l.isNew ? "New lead" : "Lead"}</span>
           <h2 id="sheet-title">${esc(l.company || "New lead")}</h2>
-          <div class="tags">${stageChip(l.stage)}${verdictChip(l, true)}${closeChip(l)}${l.example ? '<span class="chip example">Example</span>' : ""}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}</div>
+          <div class="tags">${stageChip(l.stage)}${verdictChip(l, true)}${closeChip(l)}${ratingChip(l)}${l.example ? '<span class="chip example">Example</span>' : ""}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}</div>
         </div>
         <button class="btn" id="sheet-close" type="button">Close</button>
       </div>
@@ -1045,6 +1144,10 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
           <div class="stepper">${STAGES.map((s) => `<button type="button" data-stage="${s.id}" aria-pressed="${l.stage === s.id}">${esc(s.label)}</button>`).join("")}</div>
           ${l.stage === "lost" ? `<div class="field"><label for="d-lostReason">Why it was lost</label><input id="d-lostReason" data-k="lostReason" value="${esc(l.lostReason)}" placeholder="Rate, timing, went with another broker..."></div>` : ""}
         </div>`}
+
+        ${l.isNew ? "" : openSignals(l.id).map((g) => `<div class="block"><h3>News on this lead</h3>${signalHtml(g)}</div>`).join("")}
+
+        ${l.isNew || l.example ? "" : ratingHtml(l)}
 
         ${!l.isNew && ["interested", "handed_off", "quoted"].includes(l.stage) ? `<div class="block handoff"><h3>${l.stage === "interested" ? "Ready to hand off?" : "Handoff to dispatch"}</h3>
           ${l.stage === "interested" ? `<p class="help" style="margin:0">When they want a quote, copy this summary to dispatch and mark the lead With dispatch.</p>` : `<p class="help" style="margin:0">Handed off ${esc(fmtWhen(l.handedOffAt || l.updatedAt))}. Check back with dispatch until it's quoted, booked or lost.</p>`}
@@ -1100,6 +1203,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
             ${field("nextFollowUp", "Next follow-up", l.nextFollowUp, { type: "date" })}
             ${field("notes", "Notes", l.notes, { area: true })}
           </div>
+          ${contactsHtml(l)}
           <datalist id="source-list">${sources.map((s) => `<option value="${esc(s)}">`).join("")}</datalist>
           <div class="inline">
             <button class="btn primary" type="button" id="btn-save-lead">${l.isNew ? "Add lead" : "Save changes"}</button>
@@ -1179,6 +1283,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     });
   });
   $("sheet").addEventListener("change", (e) => {
+    if (draft && !draft.isNew && e.target.id === "d-rating-note") { setRating({ note: e.target.value.trim() }); toast("Saved"); return; }
     if (!draft || draft.isNew || !(e.target.dataset.tedit || e.target.classList.contains("touch-to"))) return;
     saveQuietly();
     toast("Saved");
@@ -1197,6 +1302,17 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     const t = e.target.closest("button");
     if (!t) return;
     if (t.id === "sheet-close") return closeSheet();
+    if (t.dataset.rate) {
+      const same = draft.rating?.value === t.dataset.rate;
+      return setRating(same ? { value: null, reasons: [] } : { value: t.dataset.rate, reasons: [] });
+    }
+    if (t.dataset.reason) {
+      const rs = new Set(draft.rating?.reasons || []);
+      rs.has(t.dataset.reason) ? rs.delete(t.dataset.reason) : rs.add(t.dataset.reason);
+      return setRating({ reasons: [...rs] });
+    }
+    if (t.dataset.signalApply) return applySignal(t.dataset.signalApply);
+    if (t.dataset.signalDismiss) { const g = signals.get(t.dataset.signalDismiss); if (g) { saveSignal({ ...g, status: "dismissed", resolvedAt: nowIso() }); renderSheet(); toast("Dismissed"); } return; }
     if (t.dataset.copy) return copy(t.dataset.copy);
     if (t.dataset.stage) return setStage(t.dataset.stage);
     if (t.id === "btn-copy-handoff") { readForm(); return copy(handoffText(draft), "Summary copied. Paste it to dispatch."); }
