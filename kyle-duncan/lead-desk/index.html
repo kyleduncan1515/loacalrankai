@@ -395,16 +395,16 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   <section class="view" id="view-machine" hidden>
     <div class="block">
       <div class="brief-head"><h3>Machine status</h3><span id="m-status" class="muted"></span></div>
-      <p class="help" style="margin:0">The machine runs on its own every weekday around 6:40am and 12:40pm Houston time. Each run it hunts new freight leads, researches them, writes the full outreach sequence for each one into this desk, and leaves you a brief. It never sends anything or contacts anyone. You do that from <b>Outreach due</b> on the Today tab.</p>
+      <p class="help" style="margin:0">The machine runs on its own every weekday around 6:40am and 12:40pm Houston time. Each run it hunts new freight leads anywhere in the US, rotating through six regions so every part of the country gets covered, researches them, writes the full outreach sequence for each one into this desk, and leaves you a brief. It never sends anything or contacts anyone. You do that from <b>Outreach due</b> on the Today tab.</p>
     </div>
     <div class="block">
       <h3>Controls</h3>
       <label class="toggle" for="m-paused"><input type="checkbox" id="m-paused"> Pause the machine</label>
       <div class="form-grid">
         <div class="field"><label for="m-per-run">New leads per run</label><input id="m-per-run" type="number" min="0" max="25"></div>
-        <div class="field"><label for="m-area">Hunting area</label><input id="m-area" placeholder="Houston metro and the Texas Gulf Coast"></div>
-        <div class="field wide"><label for="m-focus">Focus</label><input id="m-focus" placeholder="e.g. heavy haul for pipeline and highway jobs, reefer shippers in Katy"></div>
-        <div class="field wide"><label for="m-notes">Standing instructions for the machine</label><textarea id="m-notes" placeholder="e.g. Skip anything under $250k. Prefer companies within 50 miles of Humble. Don't target national carriers or other brokers."></textarea></div>
+        <div class="field"><label for="m-area">Hunting area</label><input id="m-area" placeholder="Nationwide, or a state or city"></div>
+        <div class="field wide"><label for="m-focus">Focus</label><input id="m-focus" placeholder="e.g. heavy haul for pipeline and highway jobs, reefer shippers in the Midwest"></div>
+        <div class="field wide"><label for="m-notes">Standing instructions for the machine</label><textarea id="m-notes" placeholder="e.g. Skip anything under $250k. Don't target national carriers or other brokers."></textarea></div>
       </div>
       <div><button class="btn primary" id="btn-save-machine" type="button">Save controls</button></div>
     </div>
@@ -475,7 +475,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   const CHANNEL_LABEL = { email: "Email", call: "Call", voicemail: "Voicemail", linkedin: "LinkedIn" };
   const CHANNEL_ACTIVITY = { email: "email", call: "call", voicemail: "call", linkedin: "linkedin" };
   const OPEN_STAGES = new Set(["new", "contacted"]);
-  const DEFAULT_MACHINE = { paused: false, newLeadsPerRun: 8, area: "Houston metro and the Texas Gulf Coast", focus: "", notes: "" };
+  const DEFAULT_MACHINE = { paused: false, newLeadsPerRun: 8, area: "Nationwide", focus: "", notes: "" };
   const COUNTS_AS_CONTACT = new Set(["call", "email", "text", "linkedin", "visit"]);
   const DISPATCH_PHONE = "713-824-7168";
   const DISPATCH_EMAIL = "Summit-Dispatch@summittransitllc.com";
@@ -688,7 +688,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     const r = runs[0];
     if (!r) return `<div class="brief"><div class="brief-head"><span class="eyebrow">Machine brief</span></div><div class="brief-text muted">No runs yet. The machine's first brief shows up here after its next scheduled run.</div></div>`;
     const dot = r.status === "failed" ? "failed" : r.status === "paused" ? "paused" : "";
-    return `<div class="brief"><div class="brief-head"><span class="eyebrow"><span class="status-dot ${dot}"></span>Machine brief · ${esc(r.slot || "run")}</span><span class="muted num" style="font-size:12px">${esc(fmtWhen(r.at))}</span></div>
+    return `<div class="brief"><div class="brief-head"><span class="eyebrow"><span class="status-dot ${dot}"></span>Machine brief · ${esc(r.slot || "run")}${r.region ? " · " + esc(r.region) : ""}</span><span class="muted num" style="font-size:12px">${esc(fmtWhen(r.at))}</span></div>
       <div class="brief-text">${esc(r.brief || "")}</div>
       <div class="tags"><span class="chip">${esc(r.newLeads ?? 0)} new lead${r.newLeads === 1 ? "" : "s"}</span><span class="chip">${esc(r.touchesWritten ?? 0)} touches written</span></div></div>`;
   }
@@ -850,7 +850,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     $("m-status").innerHTML = machine.paused ? `<span class="status-dot paused"></span>Paused` : r ? `<span class="status-dot ${r.status === "failed" ? "failed" : ""}"></span>Last run ${esc(fmtWhen(r.at))}` : "Waiting for its first run";
     $("run-count").textContent = runs.length ? `${runs.length} recent` : "";
     $("run-list").innerHTML = runs.length ? runs.map((x) => `<li>
-      <div class="brief-head"><b>${esc(fmtWhen(x.at))} · ${esc(x.slot || "run")}</b><span class="tags">${x.status && x.status !== "ok" ? `<span class="chip ${x.status === "failed" ? "overdue" : "due"}">${esc(x.status)}</span>` : ""}<span class="chip">${esc(x.newLeads ?? 0)} leads</span><span class="chip">${esc(x.touchesWritten ?? 0)} touches</span></span></div>
+      <div class="brief-head"><b>${esc(fmtWhen(x.at))} · ${esc(x.slot || "run")}${x.region ? " · " + esc(x.region) : ""}</b><span class="tags">${x.status && x.status !== "ok" ? `<span class="chip ${x.status === "failed" ? "overdue" : "due"}">${esc(x.status)}</span>` : ""}<span class="chip">${esc(x.newLeads ?? 0)} leads</span><span class="chip">${esc(x.touchesWritten ?? 0)} touches</span></span></div>
       ${x.brief ? `<details><summary>Brief</summary><div class="brief-text" style="margin-top:6px">${esc(x.brief)}</div></details>` : ""}
       ${x.problems ? `<div class="help">Problems: ${esc(x.problems)}</div>` : ""}</li>`).join("")
       : `<li class="empty">No runs yet.</li>`;

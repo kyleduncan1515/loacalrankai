@@ -36,7 +36,7 @@
     "Multi-axle heavy-haul (overweight, permitted)"
   ],
   "strongLanes": [
-    "Nationwide, in and out of Houston",
+    "Nationwide, any lane in the US",
     "Houston local and Gulf Coast",
     "Oversize and heavy haul anywhere in the US",
     "Reefer anywhere in the US"
@@ -51,9 +51,8 @@
     "Anyone who just won a contract or announced a project that will move freight"
   ],
   "targetRegions": [
-    "Houston metro (Harris, Fort Bend, Montgomery, Brazoria, Galveston, Waller, Liberty, Chambers counties)",
-    "Texas Gulf Coast",
-    "All of Texas, with freight going anywhere nationwide"
+    "Nationwide: Summit works with shippers anywhere in the US",
+    "Home base: Houston metro and the Texas Gulf Coast"
   ],
   "differentiators": [
     "Houston-based team: we know the port, the plants, the Ship Channel and the local carriers",

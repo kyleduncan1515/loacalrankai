@@ -24,7 +24,7 @@ Kyle is an independent agent for Summit Transit LLC, a freight brokerage in Humb
 ## The shift
 
 ### 1. Read the controls
-Get `settings/machine`. If it doesn't exist, use the defaults: `paused: false`, `newLeadsPerRun: 8`, `area: "Houston metro and the Texas Gulf Coast"`, `focus: ""`, `notes: ""`.
+Get `settings/machine`. If it doesn't exist, use the defaults: `paused: false`, `newLeadsPerRun: 8`, `area: "Nationwide"`, `focus: ""`, `notes: ""`.
 
 If `paused` is true, write the run document (step 6) with `status: "paused"`, `newLeads: 0`, `touchesWritten: 0` and the brief "Paused from the Machine tab. No new leads this shift." Then stop.
 
@@ -32,26 +32,36 @@ If `paused` is true, write the run document (step 6) with `status: "paused"`, `n
 List `leads` (limit 1000). Note every company name, normalized to lowercase with "inc", "llc", "co" and punctuation removed, so you never add one twice. Ignore leads with `example: true` for everything except duplicate checks. Count the outreach due today: touches with `status: "ready"` and `due` on or before today, on leads whose `stage` is `new` or `contacted`.
 
 ### 3. Hunt
-Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. Use web search and web fetch. Rotate your sources so the shifts don't repeat themselves:
+Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. Use web search and web fetch. Summit works with shippers anywhere in the US, so when `area` is "Nationwide" (the default), hunt the whole country.
 
-- **Morning shift: awards and projects.** Recent public contract awards (federal awards on USAspending.gov and SAM.gov, TxDOT lettings and low bidders, Harris County and other county commissioners court awards, City of Houston, Port Houston, METRO, school districts, water and utility authorities) and newly announced construction, energy, petrochemical, LNG, pipeline and industrial projects. Follow the freight to whoever controls the trucks: the prime, a subcontractor, a material supplier, or the owner.
+**Rotate regions.** So the leads don't all come from one place, each shift hunts one region. Read the last few `runs` documents, then pick the region hunted least recently (on a tie, take the next one in this order), and save it as `region` in this run's document:
+1. Texas and Louisiana
+2. Southeast (Oklahoma, Arkansas, Mississippi, Alabama, Georgia, Florida, Tennessee, the Carolinas)
+3. Mid-Atlantic and Northeast (Virginia to Maine)
+4. Midwest and Great Lakes (Ohio, Michigan, Indiana, Illinois, Wisconsin, Minnesota, Iowa, Missouri, Kentucky)
+5. Plains and Mountain (Kansas, Nebraska, the Dakotas, Colorado, Utah, Wyoming, Montana, Idaho, New Mexico)
+6. West Coast and Southwest (California, Arizona, Nevada, Oregon, Washington)
 
-  Start the morning shift with new federal contract awards straight from USAspending's free public API (no key needed). Run this with today's date and 30 days back, once for Harris County (`201`) and again for the other Houston-area counties (Fort Bend `157`, Montgomery `339`, Brazoria `039`, Galveston `167`), and try NAICS `23` (construction), `21` (oil, gas and mining) and `31`–`33` (manufacturing):
+If `area` names a specific place (a state, a city, "Texas only"), hunt only there and skip the rotation. Rotate your sources too, so the shifts don't repeat themselves:
+
+- **Morning shift: awards and projects.** Recent public contract awards (federal awards on USAspending.gov and SAM.gov, state DOT lettings and low bidders, county and city awards, ports, transit agencies, school districts, water and utility authorities) and newly announced construction, energy, petrochemical, LNG, pipeline, data center, power and industrial projects. Follow the freight to whoever controls the trucks: the prime, a subcontractor, a material supplier, or the owner.
+
+  Start the morning shift with new federal contract awards straight from USAspending's free public API (no key needed). Run it with today's date and 30 days back, once for each state in the region (`"state":"<two-letter code>"`), and try NAICS `23` (construction), `21` (oil, gas and mining) and `31`–`33` (manufacturing):
   ```
-  curl -sS -X POST https://api.usaspending.gov/api/v2/search/spending_by_award/ -H 'content-type: application/json' -d '{"filters":{"award_type_codes":["A","B","C","D"],"time_period":[{"start_date":"<30 days ago>","end_date":"<today>","date_type":"new_awards_only"}],"place_of_performance_locations":[{"country":"USA","state":"TX","county":"201"}],"naics_codes":{"require":["23"]},"award_amounts":[{"lower_bound":250000}]},"fields":["Award ID","Recipient Name","Award Amount","Description","Awarding Agency","Start Date","generated_internal_id"],"limit":25,"sort":"Award Amount","order":"desc"}'
+  curl -sS -X POST https://api.usaspending.gov/api/v2/search/spending_by_award/ -H 'content-type: application/json' -d '{"filters":{"award_type_codes":["A","B","C","D"],"time_period":[{"start_date":"<30 days ago>","end_date":"<today>","date_type":"new_awards_only"}],"place_of_performance_locations":[{"country":"USA","state":"TX"}],"naics_codes":{"require":["23"]},"award_amounts":[{"lower_bound":1000000}]},"fields":["Award ID","Recipient Name","Award Amount","Description","Awarding Agency","Start Date","generated_internal_id"],"limit":25,"sort":"Award Amount","order":"desc"}'
   ```
-  The award's source URL is `https://www.usaspending.gov/award/<generated_internal_id>`. Skip awards that create no freight (pure services, IT, consulting, staffing). For the ones that do, follow the freight: the winner, its subcontractors and its material suppliers. Then hunt local awards and projects on the web.
+  The award's source URL is `https://www.usaspending.gov/award/<generated_internal_id>`. Skip awards that create no freight (pure services, IT, consulting, staffing). For the ones that do, follow the freight: the winner, its subcontractors and its material suppliers. Then hunt state and local awards and projects on the web (search "<state> DOT letting results", "<county> commissioners award contract", "low bidder" plus the month).
 
-  Harris County's Commissioners Court records are free and official, through the Legistar API (no key). Search recent items for awards:
+  Many counties and cities publish their meeting records free through the Legistar API (no key). The client name is the subdomain of the government's `legistar.com` site (Harris County is `harriscountytx`; find others by searching `site:legistar.com "<county or city name>"`). Search recent items for awards:
   ```
-  curl -sS -G "https://webapi.legistar.com/v1/harriscountytx/matters" --data-urlencode "\$filter=substringof('award',MatterTitle) and MatterIntroDate ge datetime'<YYYY-MM-DD 30 days ago>'" --data-urlencode "\$orderby=MatterIntroDate desc" --data-urlencode "\$top=100"
+  curl -sS -G "https://webapi.legistar.com/v1/<client>/matters" --data-urlencode "\$filter=substringof('award',MatterTitle) and MatterIntroDate ge datetime'<YYYY-MM-DD 30 days ago>'" --data-urlencode "\$orderby=MatterIntroDate desc" --data-urlencode "\$top=100"
   ```
-  Look for "approval of an award ... to <contractor> in the amount of ...". Its source URL is `https://harriscountytx.legistar.com/LegislationDetail.aspx?ID=<MatterId>&GUID=<MatterGuid>`, and award PDFs are under `/matters/<MatterId>/attachments`. Those PDFs include the bid tabulation, which names every bidder; the other bidders on a civil job are good leads too. Change orders that add days to a contractor's job ("change in contract ... adding N calendar days") show work that is still active.
+  Look for "approval of an award ... to <contractor> in the amount of ...". Its source URL is `https://<client>.legistar.com/LegislationDetail.aspx?ID=<MatterId>&GUID=<MatterGuid>`, and award PDFs are under `/matters/<MatterId>/attachments`. Those PDFs often include the bid tabulation, which names every bidder; the other bidders on a civil job are good leads too. Change orders that add days to a contractor's job ("change in contract ... adding N calendar days") show work that is still active.
 
-  **Confirm county and city awards in the official record before using them.** Local news recap sites sometimes get awards wrong. If Legistar (or the city's equivalent) doesn't show the award, don't use it as the trigger.
-- **Afternoon shift: shippers with a fresh signal.** New or expanding plants, warehouses and distribution centers; manufacturers and distributors hiring logistics or shipping staff; food, produce and beverage shippers heading into a peak; importers moving freight off Port Houston; building materials and steel suppliers.
+  **Confirm county and city awards in the official record before using them.** Local news recap sites sometimes get awards wrong. If the government's own record doesn't show the award, don't use it as the trigger.
+- **Afternoon shift: shippers with a fresh signal.** New or expanding plants, warehouses and distribution centers; manufacturers and distributors hiring logistics or shipping staff; food, produce and beverage shippers heading into a peak; importers moving freight off a port; building materials and steel suppliers. Good sources: state economic development announcements, regional business journals, and company press releases.
 
-Prefer the last 30 days. Favor fit with Summit's services: local, nationwide long haul, oversized and heavy haul, and reefer. Summit hauls nationwide, so a Houston-area shipper sending freight anywhere in the US is a fit, and oversized freight (modules, vessels, structures, heavy equipment) is a strength worth hunting for.
+Prefer the last 30 days. Favor fit with Summit's services: local, nationwide long haul, oversized and heavy haul, and reefer. A shipper anywhere in the US is a fit, and oversized freight (modules, vessels, transformers, structures, heavy equipment) is a strength worth hunting for.
 
 Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. Only then add fewer than asked. Quality still beats count: never add a target without real evidence.
 
@@ -61,7 +71,7 @@ For each company, find out:
 - the trigger (what happened, when, and the source URL), what freight it creates, and when that freight moves
 - who to talk to: a name if it's published, otherwise the title (project manager, procurement, logistics or shipping manager, plant manager, owner at a small company)
 - the company's published main phone number and published contact email, if any. Look on the company's own website (contact, locations and about pages), its press releases (media contacts don't count; you want the business line), and its business listings. Free places that often name a person: county, city, TxDOT and other public award documents and bid tabulations (they often list the contractor's contact person, phone and email), job postings that name a hiring manager, and a company's own team or locations page. Use only free sources; never sign up for or pay for a data service. A lead Kyle can't reach is worth little, so try hard here, and when two targets are otherwise equal, pick the one you can reach.
-- how Kyle can find the right person: a ready-to-paste search string, e.g. `"PV Hardware" Houston (logistics OR "supply chain" OR shipping) manager site:linkedin.com`
+- how Kyle can find the right person: a ready-to-paste search string, e.g. `"PV Hardware" <city> (logistics OR "supply chain" OR shipping) manager site:linkedin.com`
 - city and state, and the website
 - a score from 1 to 10: size of the freight opportunity × fit for Summit × how fresh the trigger is
 
@@ -70,7 +80,7 @@ Kyle needs to know who he's dealing with before he reaches out. **Every lead get
 
 Research, using free public sources only:
 - **Their story:** when and where they were founded, by whom, who owns or runs them now, size, what they do, and ownership changes (acquisitions, new parent companies).
-- **Past work:** real projects with client, date, value and source. For contractors, search Harris County's Legistar records by company name (the curl pattern in step 3, filtering `substringof('<Company>',MatterTitle)` with no date limit) for awards, change orders and completions; also USAspending (`recipient_search_text`), TxDOT and City of Houston records. For manufacturers and shippers, use their news, press releases and plant announcements.
+- **Past work:** real projects with client, date, value and source. For contractors, search the Legistar records of the counties and cities where they work by company name (the curl pattern in step 3, filtering `substringof('<Company>',MatterTitle)` with no date limit) for awards, change orders and completions; also USAspending (`recipient_search_text`) and the state DOT's award records. For manufacturers and shippers, use their news, press releases and plant announcements.
 - **How they do business:** patterns worth knowing. Do they win public work on low bid or best proposal? Self-perform or subcontract? Do jobs regularly run long (change orders adding days)? Do they haul with their own fleet? Are they public, private equity owned, or family owned?
 - **Watch-outs:** anything Kyle should know before doing business. Terminated or rescinded contracts, failed bonds, settlements, lawsuits, liens, OSHA citations, debarment (SAM.gov exclusions), bankruptcy, layoffs or plant closures, customs or trade problems, a forfeited Texas franchise tax status. Rate each `info`, `caution` or `serious`, and cite a source. If you looked and found nothing, say so in the summary. Directory sites (Levelset, ZoomInfo and similar) are self-reported or aggregated, so label anything from them as unverified.
 - **Verdict:**
@@ -80,11 +90,10 @@ Research, using free public sources only:
 - **Close score (1–10):** how easy this lead will be to close. 1 is a hard close, 10 is an easy close. Judge it on:
   - **Urgency:** a fresh award or project starting soon scores higher than a vague or far-off need.
   - **Reachability:** a named decision-maker with a published email or direct line scores higher than a main line only.
-  - **Size and formality:** a small or mid-size local company that books its own trucks scores higher than a national firm with a procurement department and locked-in carrier contracts.
+  - **Size and formality:** a small or mid-size company that books its own trucks scores higher than a national firm with a procurement department and locked-in carrier contracts.
   - **Fleet:** a company that hauls with its own trucks scores lower, unless the job needs equipment it doesn't own (oversize, heavy haul, reefer, long haul).
-  - **Fit:** freight that matches what Summit moves well (Houston local, nationwide, oversize, heavy haul, reefer) scores higher.
+  - **Fit:** freight that matches what Summit moves well (long haul anywhere in the US, Houston local, oversize, heavy haul, reefer) scores higher.
   - **Risk:** serious watch-outs (payment problems, lawsuits, terminated contracts) pull the score down.
-  - **Proximity:** a Houston-area company scores a little higher than one based far away.
 
   Put the number in `closeScore` and one plain sentence explaining it in `closeReason`. Be honest; most leads land between 3 and 7.
 
@@ -166,7 +175,7 @@ Thank you for your time,
 
 **All emails:**
 - 50–140 words, not counting the footer. Short paragraphs.
-- Subject lines in normal sentence capitalization, 3–7 words, specific and friendly ("Your new Houston distribution center", "Lanes out of the Houston DC", "One last note"). No clickbait.
+- Subject lines in normal sentence capitalization, 3–7 words, specific and friendly ("Your new Memphis distribution center", "Lanes out of the new DC", "One last note"). No clickbait.
 - Never write "I hope this finds you well", "touching base", "just checking in", "circling back", or buzzwords ("synergy", "solutions", "leverage", "seamless", "best-in-class").
 - The ask always points to Summit's dispatch, never back to Kyle. Never ask them to mention Kyle's name or say who referred them. Never say dispatch quotes "instantly" or "on the spot".
 - Don't sign the email. Kyle's email adds his signature automatically, so end with the close line ("Thank you for your time," or similar), a blank line, then the footer:
@@ -176,9 +185,9 @@ Thank you for your time,
   ```
   Dispatch's phone and email still go in the body's ask. Read them from `summit-transit.json` (`brokerage.phone`, `brokerage.email`) in case they've changed.
 
-**Calls (t2, t5):** open with "Hi, this is Kyle Duncan with Summit Transit. I'll be brief. Do you have 30 seconds for me to tell you why I'm calling?" then a one-line reason tied to their news ("Summit helps shippers cover ..."), 2–3 specific questions, and the ask: their next lane can go to our dispatch at 713-824-7168 for a quote, or we can have dispatch call them. Voicemails run under 25 seconds: "Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble," the reason, and the dispatch number said twice. Write calls in plain, friendly spoken language.
+**Calls (t2, t5):** open with "Hi, this is Kyle Duncan with Summit Transit. I'll be brief. Do you have 30 seconds for me to tell you why I'm calling?" then a one-line reason tied to their news ("Summit helps shippers cover ..."), 2–3 specific questions, and the ask: their next lane can go to our dispatch at 713-824-7168 for a quote, or we can have dispatch call them. Voicemails run under 25 seconds: "Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble, Texas," the reason, and the dispatch number said twice. Write calls in plain, friendly spoken language.
 
-**LinkedIn (t4):** under 300 characters, friendly, no pitch: "Hi, I'm Kyle with Summit Transit, a freight brokerage in Humble. Congratulations on ... I'd be glad to connect."
+**LinkedIn (t4):** under 300 characters, friendly, no pitch: "Hi, I'm Kyle with Summit Transit, a freight brokerage in Humble, Texas. Congratulations on ... I'd be glad to connect."
 
 - Every email opens with "Good morning," (or "Good morning, <first name>,"); the Lead Desk adjusts it to the time of day when Kyle sends.
 
@@ -234,6 +243,7 @@ Every lead must include `report`. `source` is `Award hunt` for awards and projec
 {
   "at": "<ISO timestamp>",
   "slot": "morning",
+  "region": "Midwest and Great Lakes",
   "status": "ok | partial | failed | paused",
   "newLeads": 6,
   "touchesWritten": 36,
