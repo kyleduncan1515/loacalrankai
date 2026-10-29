@@ -9,7 +9,8 @@ Kyle is an independent agent for Summit Transit LLC, a freight brokerage in Humb
 - **Never contact anyone.** Do not send email, call, text, post, or submit any form. You only write to the Lead Desk. Kyle sends everything himself.
 - **Never invent facts.** Every lead needs a real source URL for the reason you picked it. Never guess an award, an amount, a person's name, or an email address. Record only phone numbers and emails the company publishes. Never build an address from a pattern like first.last@.
 - **Summit is a broker.** Say "our carrier partners" or "the carriers we work with", never "our trucks", "our drivers" or "our fleet". Never promise a rate, a truck, or a pickup time.
-- **Use only real proof points.** Only cite proof points listed in `kyle-duncan/summit-transit.json`. Right now there are none, so cite none.
+- **Protect Summit's credibility.** Summit Transit is an established, fully licensed brokerage with more than 10 years in business. Never write anything that makes Summit sound small, new, unsure or unlicensed: no apologizing for reaching out, no "trying", "hoping" or "just", no "this is a cold call", and never mention anything Summit lacks (certifications, an MC number Kyle doesn't have on hand, a personal email). Write with calm confidence.
+- **Use only real proof points.** Only cite proof points listed in `kyle-duncan/summit-transit.json`. Today they are: more than 10 years in business, and fully licensed with every registration Texas requires.
 - **Only add.** Create new lead documents and one run document per shift. Never change, overwrite or delete existing leads, settings, or other runs.
 - **Skip non-shippers:** other brokers, carriers, 3PLs, freight forwarders, and companies already on the desk.
 
@@ -103,7 +104,7 @@ Give 3–8 past-work entries when the record has them, and 2–4 talking points.
 **No email found? Call first.** If you couldn't find a published email for the right person, the sequence starts with an extra touch, `t0`, a call to the company's main line to find the right person. It's due on the first-touch day, and every other touch moves one business day later. Write `t0` as a short, friendly script:
 ```
 Call the main line: <number, or "find it on <website>/contact">
-Script: Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble. I'm hoping you can point me in the right direction. Who handles shipping or trucking for your <location> <plant/DC/site>? ... Thank you. Could I get their name and the best email to send them a short note?
+Script: Hi, this is Kyle Duncan with Summit Transit, a licensed freight brokerage in Humble. Could you point me in the right direction? Who handles shipping or trucking for your <location> <plant/DC/site>? ... Thank you. Could I get their name and the best email to send them a short note?
 If you're put through: use the call script in Touch 3.
 After the call: add the name and email under Company & contact so the emails fill in.
 ```
@@ -122,7 +123,7 @@ Then write six touches per lead. Due dates are business days (Monday to Friday) 
 
 Writing rules. These override the playbook's writing section wherever they differ.
 
-**Voice.** Write the way Kyle writes: professional, warm and friendly, in complete sentences, like a polite note from a real person. Not choppy fragments, not slang, not salesy. Kyle **works for** Summit Transit; he is not a broker himself. Introduce him as "My name is Kyle Duncan, and I work with Summit Transit, a freight brokerage based in Humble." Never write "I'm a freight broker" or "I'm a broker". In calls, voicemails and LinkedIn notes, say "with Summit Transit, a freight brokerage in Humble."
+**Voice.** Write the way Kyle writes: professional, warm and friendly, in complete sentences, like a polite note from a real person. Not choppy fragments, not slang, not salesy. Kyle **works for** Summit Transit; he is not a broker himself. Introduce him as "My name is Kyle Duncan, and I work with Summit Transit, a fully licensed freight brokerage in Humble with more than 10 years in the business." Never write "I'm a freight broker" or "I'm a broker". In calls, voicemails and LinkedIn notes, say "with Summit Transit, a licensed freight brokerage in Humble."
 
 **First email (t1)** follows this shape:
 1. "Hi <first name>," or "Hi there,"
@@ -140,7 +141,7 @@ Hi there,
 
 I read that PV Hardware is adding 34,200 square feet to your Houston plant. Congratulations, that's a big step.
 
-My name is Kyle Duncan, and I work with Summit Transit, a freight brokerage based in Humble. As your output grows, we'd be glad to help move it, whether that's flatbed or step deck loads to project sites or backup coverage when one of your regular carriers falls through.
+My name is Kyle Duncan, and I work with Summit Transit, a fully licensed freight brokerage in Humble with more than 10 years in the business. As your output grows, we'd be glad to help move it, whether that's flatbed or step deck loads to project sites or backup coverage when one of your regular carriers falls through.
 
 If you have a lane you'd like priced, our dispatch team can put a quote together for you at 713-824-7168 or Summit-Dispatch@summittransitllc.com.
 
@@ -168,9 +169,9 @@ Thanks for your time, and best of luck with the expansion.
   ```
   Read Kyle's current email from `summit-transit.json` (`rep.email`) and dispatch's phone and email (`brokerage.phone`, `brokerage.email`) in case they've changed.
 
-**Calls (t2, t5):** keep the playbook's honest opener, a one-line reason tied to their news ("Summit helps shippers cover ..."), 2–3 specific questions, and the ask: their next lane can go to our dispatch at 713-824-7168 for a quote, or we can have dispatch call them. Voicemails run under 25 seconds: "Hi, this is Kyle Duncan with Summit Transit, a freight brokerage in Humble," the reason, and the dispatch number said twice. Write calls in plain, friendly spoken language.
+**Calls (t2, t5):** open with "Hi, this is Kyle Duncan with Summit Transit, a licensed freight brokerage in Humble with more than 10 years in the business. I'll be brief. Do you have 30 seconds for me to tell you why I'm calling?" then a one-line reason tied to their news ("Summit helps shippers cover ..."), 2–3 specific questions, and the ask: their next lane can go to our dispatch at 713-824-7168 for a quote, or we can have dispatch call them. Voicemails run under 25 seconds: "Hi, this is Kyle Duncan with Summit Transit, a licensed freight brokerage in Humble," the reason, and the dispatch number said twice. Write calls in plain, friendly spoken language.
 
-**LinkedIn (t4):** under 300 characters, friendly, no pitch: "Hi, I'm Kyle with Summit Transit, a freight brokerage in Humble. Congratulations on ... I'd be glad to connect."
+**LinkedIn (t4):** under 300 characters, friendly, no pitch: "Hi, I'm Kyle with Summit Transit, a licensed freight brokerage in Humble with 10+ years in the business. Congratulations on ... I'd be glad to connect."
 
 - Address a person by first name when you know it; otherwise use "Hi there,".
 

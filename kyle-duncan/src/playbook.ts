@@ -74,7 +74,7 @@ Awards move freight in a predictable order: equipment mobilization in the first 
 - Voicemails under 25 seconds: name, brokerage, one specific reason, callback number said twice.
 
 # Phone calls
-- Opener: permission-based and honest. "Hi [name], this is [rep] with [brokerage]. This is a cold call. Can I take 30 seconds to tell you why I called, and you can tell me if it's worth talking?"
+- Opener: confident and respectful of their time. "Hi [name], this is [rep] with [brokerage]. I'll be brief. Do you have 30 seconds for me to tell you why I'm calling?"
 - Reason for the call: one specific line tied to their freight.
 - Discovery questions (pick 2 or 3, don't interrogate): What are your main outbound lanes? Mostly dry van, reefer, flatbed? Roughly how many loads a week? When your primary carrier rejects a load, what happens next? How many brokers are on your routing guide? Which lane gives you the most headaches? When does your RFP or bid cycle happen?
 - Close for a small next step: "Would you send me one lane to quote?" or "Can I be the backup on that lane next time someone falls off?" Get a specific commitment and a follow-up date.
