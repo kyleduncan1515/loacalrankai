@@ -217,6 +217,28 @@ td.r, th.r { text-align: right; }
 .touch-subj { font-weight: 600; overflow-wrap: anywhere; }
 .touch-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; background: var(--sunk); border-radius: 6px; padding: 10px; margin: 0; font-family: var(--body); }
 .touches { display: grid; gap: 10px; }
+/* Vetting report */
+.report { gap: 10px; }
+.report-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.verdict { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.verdict::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.v-green { background: var(--good-soft); color: var(--good); }
+.v-yellow { background: var(--amber-soft); color: var(--amber); }
+.v-red { background: var(--bad-soft); color: var(--bad); }
+.v-none { background: var(--sunk); color: var(--muted); }
+.report p { margin: 0; max-width: 75ch; }
+.report details { border-top: 1px solid var(--line); padding-top: 8px; }
+.report summary { cursor: pointer; font-family: var(--display); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; font-size: 15px; list-style-position: outside; }
+.report summary .count { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: 6px; text-transform: none; letter-spacing: 0; }
+.report ul, .report ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+.report li { font-size: 14px; overflow-wrap: anywhere; }
+.report .src { font-size: 12px; margin-left: 4px; }
+.lvl { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; margin-right: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.lvl-info { background: var(--sunk); color: var(--muted); }
+.lvl-caution { background: var(--amber-soft); color: var(--amber); }
+.lvl-serious { background: var(--bad-soft); color: var(--bad); }
+.pastwork { width: 100%; font-size: 13.5px; margin-top: 8px; }
+.pastwork td, .pastwork th { padding: 6px 8px; }
 .touch textarea.touch-edit { min-height: 140px; font-family: var(--body); line-height: 1.45; resize: vertical; }
 .touch .field input, .touch .field textarea { background: var(--surface); }
 .send-hint { margin: 0; padding: 8px 10px; border-radius: 6px; background: var(--amber-soft); border: 1px solid var(--amber-line); font-size: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
@@ -322,7 +344,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     </div>
     <div class="panel table-wrap">
       <table>
-        <thead><tr><th>Company</th><th>Contact</th><th>Stage</th><th>Freight</th><th>Source</th><th>Next follow-up</th><th class="r">Loads</th></tr></thead>
+        <thead><tr><th>Company</th><th>Vetting</th><th>Contact</th><th>Stage</th><th>Freight</th><th>Source</th><th>Next follow-up</th><th class="r">Loads</th></tr></thead>
         <tbody id="lead-rows"></tbody>
       </table>
     </div>
@@ -649,7 +671,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   function rowHtml(l, sideHtml) {
     const meta = [l.contactName && `${l.contactName}${l.contactTitle ? ", " + l.contactTitle : ""}`, l.location, l.freight].filter(Boolean).map(esc).join(" · ");
     return `<li class="row" tabindex="0" data-open="${esc(l.id)}">
-      <span class="name">${esc(l.company || "Untitled lead")}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.origin === "machine" ? ` <span class="chip machine">Machine${l.research?.score ? " · " + esc(l.research.score) : ""}</span>` : ""}</span>
+      <span class="name">${esc(l.company || "Untitled lead")}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.origin === "machine" ? ` <span class="chip machine">Machine${l.research?.score ? " · " + esc(l.research.score) : ""}</span>` : ""} ${verdictChip(l, true)}</span>
       <span class="side">${sideHtml}</span>
       <span class="meta">${meta || "&nbsp;"}</span></li>`;
   }
@@ -712,7 +734,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
           const fs = followState(l);
           return `<button class="card" type="button" data-open="${esc(l.id)}"><span class="name">${esc(l.company || "Untitled lead")}</span>
             <span class="meta">${esc([l.freight, l.location].filter(Boolean).join(" · "))}</span>
-            <span class="tags">${l.example ? '<span class="chip example">Example</span>' : ""}${fs === "overdue" ? `<span class="chip overdue">Overdue</span>` : fs === "due" ? `<span class="chip due">Today</span>` : l.nextFollowUp && fs ? `<span class="chip">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}${s.id === "booked" ? `<span class="chip s-booked">${(l.loads || []).length} load${(l.loads || []).length === 1 ? "" : "s"}</span>` : ""}</span></button>`;
+            <span class="tags">${verdictChip(l, true)}${l.example ? '<span class="chip example">Example</span>' : ""}${fs === "overdue" ? `<span class="chip overdue">Overdue</span>` : fs === "due" ? `<span class="chip due">Today</span>` : l.nextFollowUp && fs ? `<span class="chip">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}${s.id === "booked" ? `<span class="chip s-booked">${(l.loads || []).length} load${(l.loads || []).length === 1 ? "" : "s"}</span>` : ""}</span></button>`;
         }).join("") : `<div class="empty">None</div>`}</div>`;
     }).join("");
     const lost = all.filter((l) => l.stage === "lost").length;
@@ -737,11 +759,12 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     ).sort((a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage] || (a.company || "").localeCompare(b.company || ""));
     $("lead-rows").innerHTML = rows.length ? rows.map((l) => `<tr data-open="${esc(l.id)}" tabindex="0">
       <td><b>${esc(l.company || "Untitled lead")}</b>${l.example ? ' <span class="chip example">Example</span>' : ""}${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
+      <td>${verdictChip(l, false)}</td>
       <td>${esc(l.contactName)}${l.contactTitle ? `<div class="muted" style="font-size:13px">${esc(l.contactTitle)}</div>` : ""}</td>
       <td>${stageChip(l.stage)}</td><td>${esc(l.freight)}</td><td>${esc(l.source)}</td>
       <td>${l.nextFollowUp ? `<span class="chip ${followState(l) === "overdue" ? "overdue" : followState(l) === "due" ? "due" : ""}">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}</td>
       <td class="r num">${(l.loads || []).length || ""}</td></tr>`).join("")
-      : `<tr><td colspan="7" class="empty">${leads.size ? "No leads match these filters." : "No leads yet. Add one or import a list."}</td></tr>`;
+      : `<tr><td colspan="8" class="empty">${leads.size ? "No leads match these filters." : "No leads yet. Add one or import a list."}</td></tr>`;
   }
 
   function weekChart() {
@@ -891,6 +914,36 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   }
   const openedCompose = new Set();
 
+  const VERDICT = { green: "Good to contact", yellow: "Proceed with care", red: "Caution" };
+  function verdictChip(l, small) {
+    const v = l.report?.verdict;
+    if (!v) return small ? "" : `<span class="verdict v-none">Not vetted yet</span>`;
+    return `<span class="verdict v-${esc(v)}" title="${esc(l.report.verdictReason || "")}">${esc(VERDICT[v] || v)}</span>`;
+  }
+  function srcLink(u) { return u && /^https?:\/\//.test(u) ? `<a class="src" href="${esc(u)}" target="_blank" rel="noopener">source</a>` : ""; }
+  function reportHtml(l) {
+    const r = l.report;
+    if (!r) return `<div class="block report"><div class="report-head"><h3>Vetting report</h3>${verdictChip(l)}</div><p class="help">No report yet. New leads from the machine come with one.</p></div>`;
+    const watch = r.watchOuts || [], past = r.pastWork || [], how = r.howTheyWork || [], tp = r.talkingPoints || [], srcs = r.sources || [];
+    const order = { serious: 0, caution: 1, info: 2 };
+    return `<div class="block report" id="report-block">
+      <div class="report-head"><h3>Vetting report</h3>${verdictChip(l)}</div>
+      ${r.verdictReason ? `<p><b>${esc(r.verdictReason)}</b></p>` : ""}
+      ${r.summary ? `<p>${esc(r.summary)}</p>` : ""}
+      <details open><summary>Watch-outs<span class="count">${watch.length}</span></summary>
+        ${watch.length ? `<ul>${[...watch].sort((a, b) => (order[a.level] ?? 3) - (order[b.level] ?? 3)).map((w) => `<li><span class="lvl lvl-${esc(w.level || "info")}">${esc(w.level || "info")}</span>${esc(w.text)}${srcLink(w.source)}</li>`).join("")}</ul>` : `<p class="help">Nothing found in public records.</p>`}
+      </details>
+      ${r.story ? `<details><summary>Their story</summary><p style="margin-top:8px">${esc(r.story)}</p></details>` : ""}
+      ${past.length ? `<details><summary>Past work<span class="count">${past.length}</span></summary><div class="table-wrap"><table class="pastwork"><thead><tr><th>When</th><th>Project</th><th>Client</th><th class="r">Value</th></tr></thead><tbody>
+        ${past.map((p) => `<tr><td class="num">${esc(p.when || "")}</td><td>${esc(p.what || "")}${srcLink(p.source)}</td><td>${esc(p.client || "")}</td><td class="r num">${esc(p.value || "")}</td></tr>`).join("")}</tbody></table></div></details>` : ""}
+      ${how.length ? `<details><summary>How they do business<span class="count">${how.length}</span></summary><ul>${how.map((h) => `<li>${esc(h)}</li>`).join("")}</ul></details>` : ""}
+      ${r.freightProfile ? `<details><summary>What they'll ship</summary><p style="margin-top:8px">${esc(r.freightProfile)}</p></details>` : ""}
+      ${tp.length ? `<details open><summary>Talking points<span class="count">${tp.length}</span></summary><ul>${tp.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></details>` : ""}
+      ${srcs.length ? `<details><summary>Sources<span class="count">${srcs.length}</span></summary><ol>${srcs.map((u) => `<li>${/^https?:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 80))}</a>` : esc(u)}</li>`).join("")}</ol></details>` : ""}
+      ${r.researchedAt ? `<p class="help">Researched ${esc(fmtDay(r.researchedAt.slice(0, 10)))}. Public records only; confirm anything important before relying on it.</p>` : ""}
+    </div>`;
+  }
+
   function renderSheet() {
     const l = draft;
     const loadsMargin = (l.loads || []).reduce((t, x) => t + (x.margin || 0), 0);
@@ -901,7 +954,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
         <div style="min-width:0;display:grid;gap:6px">
           <span class="eyebrow">${l.isNew ? "New lead" : "Lead"}</span>
           <h2 id="sheet-title">${esc(l.company || "New lead")}</h2>
-          <div class="tags">${stageChip(l.stage)}${l.example ? '<span class="chip example">Example</span>' : ""}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}</div>
+          <div class="tags">${stageChip(l.stage)}${verdictChip(l, true)}${l.example ? '<span class="chip example">Example</span>' : ""}${l.source ? `<span class="chip">${esc(l.source)}</span>` : ""}</div>
         </div>
         <button class="btn" id="sheet-close" type="button">Close</button>
       </div>
@@ -925,6 +978,8 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
           ${l.research.findContact ? `<div class="inline"><span class="help" style="flex:1 1 220px">Find the right person: <span class="num" style="user-select:all">${esc(l.research.findContact)}</span></span><button class="btn small" type="button" data-copy="${esc(l.research.findContact)}">Copy search</button></div>` : ""}
           ${(l.research.evidence || []).length ? `<div class="help">Sources: ${(l.research.evidence || []).map((u) => /^https?:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 60))}</a>` : esc(u)).join(" · ")}</div>` : ""}
         </div>` : ""}
+
+        ${l.isNew ? "" : reportHtml(l)}
 
         ${!l.isNew && (l.touches || []).length ? `<div class="block" id="touch-block"><h3>Outreach sequence</h3>
           ${OPEN_STAGES.has(l.stage) ? "" : `<p class="help" style="margin:0">This lead has moved past outreach, so the remaining touches are on hold.</p>`}

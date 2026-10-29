@@ -64,6 +64,39 @@ For each company, find out:
 - city and state, and the website
 - a score from 1 to 10: size of the freight opportunity × fit for Summit × how fresh the trigger is
 
+### 4b. Vet every target and write its report
+Kyle needs to know who he's dealing with before he reaches out. **Every lead gets a vetting report. No exceptions.** Spend real effort here; a lead without a solid report isn't ready.
+
+Research, using free public sources only:
+- **Their story:** when and where they were founded, by whom, who owns or runs them now, size, what they do, and ownership changes (acquisitions, new parent companies).
+- **Past work:** real projects with client, date, value and source. For contractors, search Harris County's Legistar records by company name (the curl pattern in step 3, filtering `substringof('<Company>',MatterTitle)` with no date limit) for awards, change orders and completions; also USAspending (`recipient_search_text`), TxDOT and City of Houston records. For manufacturers and shippers, use their news, press releases and plant announcements.
+- **How they do business:** patterns worth knowing. Do they win public work on low bid or best proposal? Self-perform or subcontract? Do jobs regularly run long (change orders adding days)? Are they a certified MWBE/DBE firm, or do they rely on MWBE subcontractors? Do they haul with their own fleet? Are they public, private equity owned, or family owned?
+- **Watch-outs:** anything Kyle should know before doing business. Terminated or rescinded contracts, failed bonds, settlements, lawsuits, liens, OSHA citations, debarment (SAM.gov exclusions), bankruptcy, layoffs or plant closures, customs or trade problems, a forfeited Texas franchise tax status. Rate each `info`, `caution` or `serious`, and cite a source. If you looked and found nothing, say so in the summary. Directory sites (Levelset, ZoomInfo and similar) are self-reported or aggregated, so label anything from them as unverified.
+- **Verdict:**
+  - `green`: good to contact.
+  - `yellow`: fine to contact, but know the watch-outs going in.
+  - `red`: serious problems. Contact only if Kyle decides to, and explain why in `verdictReason`.
+
+Never put watch-outs in the outreach. They're for Kyle only; the emails stay positive.
+
+The report goes in the lead document as `report`:
+```json
+"report": {
+  "verdict": "green | yellow | red",
+  "verdictReason": "One sentence: why this verdict.",
+  "summary": "2-3 sentences: who they are and why they matter to Summit.",
+  "story": "A short paragraph: founding, owners, size, what they do, ownership changes.",
+  "pastWork": [ { "when": "2026", "what": "Inwood Forest detention basin excavation", "client": "Harris County Flood Control District", "value": "$6,576,337", "source": "https://..." } ],
+  "howTheyWork": [ "Wins county work on low bid", "Jobs often extended by change orders" ],
+  "watchOuts": [ { "level": "info | caution | serious", "text": "...", "source": "https://..." } ],
+  "freightProfile": "What they move, on what equipment, how often, and when.",
+  "talkingPoints": [ "How to use this research on the first call" ],
+  "sources": [ "https://..." ],
+  "researchedAt": "<ISO timestamp>"
+}
+```
+Give 3–8 past-work entries when the record has them, and 2–4 talking points. Every past-work entry and watch-out needs a source when one exists.
+
 ### 5. Write the outreach sequence
 **No email found? Call first.** If you couldn't find a published email for the right person, the sequence starts with an extra touch, `t0`, a call to the company's main line to find the right person. It's due on the first-touch day, and every other touch moves one business day later. Write `t0` as a short, friendly script:
 ```
@@ -176,13 +209,14 @@ Use one `ArtifactData` `batch` (up to 50 writes). New documents only, so omit `i
     "timing": "mobilization expected November",
     "findContact": "\"Gulf Coast Civil\" (\"project manager\" OR \"equipment manager\") site:linkedin.com"
   },
+  "report": { "...": "the vetting report from step 4b" },
   "touches": [
     { "id": "t1", "n": 1, "channel": "email", "due": "YYYY-MM-DD", "subject": "galveston levee equipment", "body": "...", "status": "ready", "doneAt": null }
   ]
 }
 ```
 
-`source` is `Award hunt` for awards and projects, and `Web research` for everything else. Every touch has `subject` (empty string for calls and LinkedIn), `body`, `status: "ready"` and `doneAt: null`. Channels are exactly `email`, `call` or `linkedin`.
+Every lead must include `report`. `source` is `Award hunt` for awards and projects, and `Web research` for everything else. Every touch has `subject` (empty string for calls and LinkedIn), `body`, `status: "ready"` and `doneAt: null`. Channels are exactly `email`, `call` or `linkedin`.
 
 **The run document** goes to collection `runs`, with doc id `run-<YYYYMMDD>-<morning|afternoon>`. If that id already exists, add `-2`.
 
