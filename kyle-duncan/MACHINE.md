@@ -73,7 +73,12 @@ If `area` names a specific place (a state, a city, "Texas only"), hunt only ther
 
 Prefer the last 30 days. Favor fit with Summit's services: local, nationwide long haul, oversized and heavy haul, and reefer. A shipper anywhere in the US is a fit, and oversized freight (modules, vessels, transformers, structures, heavy equipment) is a strength worth hunting for.
 
-Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. If you still come up short after that, add the ones that passed, mark the run `partial`, and say in `problems` what you tried and why it fell short. Never fill the gap with weak leads.
+Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. **Don't stop early.** Keep a running count of candidates researched and leads passed. Before you write the run document, check it: if you have fewer than `newLeadsPerRun` leads and have researched fewer than 4 times that many candidates, you are not done; go back to hunting. A full shift normally takes 30 to 60 minutes of searching; finishing in a few minutes means you quit too soon. When one side runs dry, shift the effort instead of stopping:
+- If the regular hunt is dry in this region (few awards, few announcements), widen it to the neighboring regions, then nationwide.
+- If the regular hunt still can't fill its half, fill the rest from the niche hunt, using a second niche if the first runs dry. Niche shippers ship year-round, so they rarely run out.
+- Put `candidatesResearched` (the number) in the run document.
+
+If you still come up short after that, add the ones that passed, mark the run `partial`, and say in `problems` what you tried and why it fell short. Never fill the gap with weak leads.
 
 ### 3b. Niche hunt
 Kyle hunts five overlooked markets as hard as everything else. These are steady, repeat shippers that big brokers skip, often too small to have a logistics department, so whoever books their truck is usually the owner, shop manager or yard manager. Each shift hunts one niche, nationwide, inside the shift's region. Read the last few `runs` documents and pick the niche hunted least recently (on a tie, the next one in this order), and save its id as `niche` in this run's document.
@@ -295,6 +300,7 @@ Every lead must include `report`. `source` is `Award hunt` for awards and projec
   "slot": "morning",
   "region": "Midwest and Great Lakes",
   "niche": "precast",
+  "candidatesResearched": 16,
   "skipped": [ { "company": "Example Corp", "closeScore": 3, "why": "National retailer with a contracted carrier program" } ],
   "status": "ok | partial | failed | paused",
   "newLeads": 6,
