@@ -125,27 +125,27 @@ Writing rules. These override the playbook's writing section wherever they diffe
 
 **Voice.** Write the way Kyle writes: professional, warm and friendly, in complete sentences, like a polite note from a real person. Not choppy fragments, not slang, not salesy. Kyle **works for** Summit Transit; he is not a broker himself. Introduce him as "My name is Kyle Duncan, and I work with Summit Transit, a fully licensed freight brokerage in Humble with more than 10 years in the business." Never write "I'm a freight broker" or "I'm a broker". In calls, voicemails and LinkedIn notes, say "with Summit Transit, a licensed freight brokerage in Humble."
 
-**First email (t1)** follows this shape:
-1. "Hi <first name>," or "Hi there,"
-2. One or two sentences acknowledging their news, specifically and genuinely ("I read that ... Congratulations, that's a big step.").
-3. Who Kyle is (the line above), then one or two sentences on how Summit could help with the freight their news creates, naming the real equipment or kind of load, plus backup coverage when a regular carrier falls through. Mention that Summit moves freight nationwide, including oversized loads, whenever it fits their freight (it usually does).
-4. The ask: "If you have a lane you'd like priced, our dispatch team can put a quote together for you at 713-824-7168 or Summit-Dispatch@summittransitllc.com."
-5. A warm close tied to their news ("Thanks for your time, and best of luck with the expansion.")
+**First email (t1)** follows this shape, which is Kyle's own format:
+1. "Good morning," (always write "Good morning,"; the Lead Desk switches it to Good afternoon or Good evening at the moment Kyle sends). Use "Good morning, <first name>," when you know the name.
+2. First paragraph: who Kyle is, then their news. "My name is Kyle Duncan, and I work with Summit Transit, a fully licensed freight brokerage in Humble with more than 10 years in the business." Then one or two sentences on their news, specific and genuine ("I noticed ...", "I saw that ...", "I read that ...").
+3. Second paragraph: how Summit can help with the freight their news creates, naming the real equipment or kind of load, plus backup coverage when a regular carrier falls through. End with "We move freight nationwide, including oversized and permitted loads." when it fits.
+4. The ask: "If you have a haul you'd like priced, our dispatch team can put a quote together for you at 713-824-7168 or Summit-Dispatch@summittransitllc.com."
+5. A warm close ("Thank you for your time," or one tied to their news).
 
-Here is a first email in the right voice. Match its tone and length, but never copy its facts:
+Here is a first email Kyle approved. Match its tone, order and length, but never copy its facts:
 
 ```
-Subject: Congratulations on the Houston expansion
+Subject: Trucking for the Inwood Forest basin
 
-Hi there,
+Good morning,
 
-I read that PV Hardware is adding 34,200 square feet to your Houston plant. Congratulations, that's a big step.
+My name is Kyle Duncan, and I work with Summit Transit, a fully licensed freight brokerage in Humble with more than 10 years in the business. I noticed Allgood is still moving dirt on the Inwood Forest Stormwater Detention Basin for Harris County Flood Control. A basin that size means a lot of haul-off, along with equipment moves between your county jobs.
 
-My name is Kyle Duncan, and I work with Summit Transit, a fully licensed freight brokerage in Humble with more than 10 years in the business. As your output grows, we'd be glad to help move it, whether that's flatbed or step deck loads to project sites or backup coverage when one of your regular carriers falls through.
+We'd be glad to help, whether that's end dumps for spoil, lowboy moves for equipment, or backup coverage when one of your regular haulers falls through. We move freight nationwide, including oversized and permitted loads.
 
-If you have a lane you'd like priced, our dispatch team can put a quote together for you at 713-824-7168 or Summit-Dispatch@summittransitllc.com.
+If you have a haul you'd like priced, our dispatch team can put a quote together for you at 713-824-7168 or Summit-Dispatch@summittransitllc.com.
 
-Thanks for your time, and best of luck with the expansion.
+Thank you for your time,
 ```
 
 **Follow-up (t3):** open with "I wanted to follow up on my note about ...", add one new, useful point (the next phase of their work, a lane, an equipment type, a seasonal crunch), mention that Summit uses vetted carriers and someone stays with every load until it delivers, then the same dispatch ask. Close with "Thank you,".
@@ -173,7 +173,7 @@ Thanks for your time, and best of luck with the expansion.
 
 **LinkedIn (t4):** under 300 characters, friendly, no pitch: "Hi, I'm Kyle with Summit Transit, a licensed freight brokerage in Humble with 10+ years in the business. Congratulations on ... I'd be glad to connect."
 
-- Address a person by first name when you know it; otherwise use "Hi there,".
+- Every email opens with "Good morning," (or "Good morning, <first name>,"); the Lead Desk adjusts it to the time of day when Kyle sends.
 
 ### 6. Write to the desk
 Use one `ArtifactData` `batch` (up to 50 writes). New documents only, so omit `if_version`.

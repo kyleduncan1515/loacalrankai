@@ -905,7 +905,17 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
 
   let quietSheet = false;
   function saveQuietly() { readForm(); quietSheet = true; try { saveLead(structuredClone(draft)); } finally { quietSheet = false; } }
+  // The greeting follows the clock at the moment Kyle sends: morning, afternoon or evening.
+  function timeGreeting(d = new Date()) {
+    const h = d.getHours();
+    return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  }
+  function withGreeting(body) {
+    return String(body || "").replace(/^(?:Hi there|Hello there|Hi|Hello|Good (?:morning|afternoon|evening))(?:,?\s+([A-Z][\w'-]*))?,[ \t]*(?=\r?\n|$)/,
+      (m, name) => `${timeGreeting()}${name ? ", " + name : ""},`);
+  }
   function composeUrl(to, subject, body) {
+    body = withGreeting(body);
     const e = encodeURIComponent;
     const w = settings.sendWith || "gmail";
     if (w === "outlook") return `https://outlook.office.com/mail/deeplink/compose?to=${e(to || "")}&subject=${e(subject || "")}&body=${e(body || "")}`;
@@ -999,7 +1009,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
                   ${t.subject ? `<button class="btn small" type="button" data-touch-copy="subject" data-tid="${esc(t.id)}">Copy subject</button>` : ""}<button class="btn small" type="button" data-touch-copy="body" data-tid="${esc(t.id)}">Copy ${t.channel === "email" || t.channel === "linkedin" ? "message" : "script"}</button>${(t.channel === "call" || t.channel === "voicemail") && l.phone ? `<button class="btn small" type="button" data-copy="${esc(l.phone)}">Copy ${esc(l.phone)}</button>` : ""}
                 </div>
                 ${openedCompose.has(t.id) ? `<p class="send-hint"><span>Sent it from ${esc(SEND_WITH[settings.sendWith] || "Gmail")}?</span><button class="btn small primary" type="button" data-touch-done="${esc(t.id)}">Yes, mark done</button></p>` : ""}
-                <span class="help">Edits save when you click away.</span>`}
+                <span class="help">Edits save when you click away.${t.channel === "email" ? " The greeting switches to Good morning, Good afternoon or Good evening when you open or copy it." : ""}</span>`}
             </div>`;
           }).join("")}</div>
         </div>` : ""}
@@ -1172,7 +1182,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     }
     if (t.dataset.touchCopy) {
       const tc = (draft.touches || []).find((x) => x.id === t.dataset.tid);
-      if (tc) copy(t.dataset.touchCopy === "subject" ? tc.subject || "" : tc.body || "", t.dataset.touchCopy === "subject" ? "Subject copied" : "Copied");
+      if (tc) copy(t.dataset.touchCopy === "subject" ? tc.subject || "" : tc.channel === "email" ? withGreeting(tc.body) : tc.body || "", t.dataset.touchCopy === "subject" ? "Subject copied" : "Copied");
       return;
     }
     if (t.dataset.touchDone || t.dataset.touchSkip || t.dataset.touchReopen) {
