@@ -78,3 +78,7 @@ To run the hunt automatically every weekday morning, add a cron entry (`crontab 
   - Commercial email needs your mailing address and an opt-out (CAN-SPAM). Honor opt-outs right away.
   - Don't auto-dial or text cell phones without consent (TCPA).
   - Never promise a truck or a rate before it's confirmed.
+
+## Ideas for later
+
+- **MWBE/DBE certification.** Harris County contracts require contractors to spend 20–37% of a job with certified minority- or women-owned businesses, and hauling can count toward it. A certified broker only gets credit for its fee unless it uses certified carriers, so it may or may not help. Worth a look once Summit is booking regular loads.

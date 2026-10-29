@@ -70,7 +70,7 @@ Kyle needs to know who he's dealing with before he reaches out. **Every lead get
 Research, using free public sources only:
 - **Their story:** when and where they were founded, by whom, who owns or runs them now, size, what they do, and ownership changes (acquisitions, new parent companies).
 - **Past work:** real projects with client, date, value and source. For contractors, search Harris County's Legistar records by company name (the curl pattern in step 3, filtering `substringof('<Company>',MatterTitle)` with no date limit) for awards, change orders and completions; also USAspending (`recipient_search_text`), TxDOT and City of Houston records. For manufacturers and shippers, use their news, press releases and plant announcements.
-- **How they do business:** patterns worth knowing. Do they win public work on low bid or best proposal? Self-perform or subcontract? Do jobs regularly run long (change orders adding days)? Are they a certified MWBE/DBE firm, or do they rely on MWBE subcontractors? Do they haul with their own fleet? Are they public, private equity owned, or family owned?
+- **How they do business:** patterns worth knowing. Do they win public work on low bid or best proposal? Self-perform or subcontract? Do jobs regularly run long (change orders adding days)? Do they haul with their own fleet? Are they public, private equity owned, or family owned?
 - **Watch-outs:** anything Kyle should know before doing business. Terminated or rescinded contracts, failed bonds, settlements, lawsuits, liens, OSHA citations, debarment (SAM.gov exclusions), bankruptcy, layoffs or plant closures, customs or trade problems, a forfeited Texas franchise tax status. Rate each `info`, `caution` or `serious`, and cite a source. If you looked and found nothing, say so in the summary. Directory sites (Levelset, ZoomInfo and similar) are self-reported or aggregated, so label anything from them as unverified.
 - **Verdict:**
   - `green`: good to contact.
@@ -78,6 +78,8 @@ Research, using free public sources only:
   - `red`: serious problems. Contact only if Kyle decides to, and explain why in `verdictReason`.
 
 Never put watch-outs in the outreach. They're for Kyle only; the emails stay positive.
+
+Summit is not MWBE, DBE or HUB certified. Don't bring up minority- or women-owned business certification or contract participation goals in reports, talking points or outreach.
 
 The report goes in the lead document as `report`:
 ```json
