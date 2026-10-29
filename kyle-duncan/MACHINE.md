@@ -32,7 +32,7 @@ If `paused` is true, write the run document (step 6) with `status: "paused"`, `n
 List `leads` (limit 1000). Note every company name, normalized to lowercase with "inc", "llc", "co" and punctuation removed, so you never add one twice. Ignore leads with `example: true` for everything except duplicate checks. Count the outreach due today: touches with `status: "ready"` and `due` on or before today, on leads whose `stage` is `new` or `contacted`.
 
 ### 3. Hunt
-Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. Use web search and web fetch. Summit works with shippers anywhere in the US, so when `area` is "Nationwide" (the default), hunt the whole country.
+Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. **Split them evenly between the regular hunt below and the niche hunt (3b):** half regular, half niche, and when the number is odd the extra one goes to the niche hunt. Use web search and web fetch. Summit works with shippers anywhere in the US, so when `area` is "Nationwide" (the default), hunt the whole country.
 
 **Rotate regions.** So the leads don't all come from one place, each shift hunts one region. Read the last few `runs` documents, then pick the region hunted least recently (on a tie, take the next one in this order), and save it as `region` in this run's document:
 1. Texas and Louisiana
@@ -64,6 +64,21 @@ If `area` names a specific place (a state, a city, "Texas only"), hunt only ther
 Prefer the last 30 days. Favor fit with Summit's services: local, nationwide long haul, oversized and heavy haul, and reefer. A shipper anywhere in the US is a fit, and oversized freight (modules, vessels, transformers, structures, heavy equipment) is a strength worth hunting for.
 
 Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. Only then add fewer than asked. Quality still beats count: never add a target without real evidence.
+
+### 3b. Niche hunt
+Kyle hunts five overlooked markets as hard as everything else. These are steady, repeat shippers that big brokers skip, often too small to have a logistics department, so whoever books their truck is usually the owner, shop manager or yard manager. Each shift hunts one niche, nationwide, inside the shift's region. Read the last few `runs` documents and pick the niche hunted least recently (on a tie, the next one in this order), and save its id as `niche` in this run's document.
+
+1. `fabricators`: **Tank, vessel and skid fabricators.** Shops that build pressure vessels, storage tanks, oilfield and process skids, modules and large weldments. Nearly everything ships oversized and permitted. Signals: a new contract or big order, a shop expansion or new bay, hiring welders or fitters in volume, ASME shop listings, a new crane or building announcement.
+2. `equipment`: **Independent equipment rental yards and used equipment dealers.** Excavators, dozers, loaders and lifts going out on lowboys and step decks to job sites, between yards and to auction buyers. Skip the national chains (United Rentals, Sunbelt, Herc), which run their own logistics. Signals: a new yard or branch, a new dealer line, hiring delivery drivers or a dispatcher, big auction consignments.
+3. `precast`: **Precast concrete, culvert and pipe makers.** Box culverts, manholes, drainage structures, barriers, concrete and steel pipe. Heavy flatbed freight with steady volume. Signals: a new plant or line, a state DOT approved-producer listing, being named as supplier on a public drainage or road job, hiring drivers or a shipping coordinator. Tie these to the award hunt: a big drainage or road award near a precast plant is a reason to call the plant.
+4. `power`: **Power and data center equipment.** Makers, rebuilders and distributors of transformers, switchgear, generators and substation steel, and the contractors installing them. Heavy haul is short in this market. Signals: a new or expanded plant, a utility or data center supply contract, a substation project award.
+5. `farm`: **Farm equipment dealers.** Dealers of tractors, combines and implements, especially multi-store groups, moving machines between stores, to farms and after auctions on step decks. Signals: a new store or acquisition, a big auction, hiring a delivery driver or logistics coordinator. Busiest before spring planting and fall harvest.
+
+Find niche leads through industry and trade association directories, state DOT approved-producer lists, Google Maps style business listings, company websites, regional business journals and job postings. A fresh signal from the last 90 days is best, since these shippers ship year-round, but a well-matched company with no news is still a fair niche lead when you can say what it ships. Set `niche` on each niche lead to the niche id and `source` to "Niche hunt". The first email's "I saw…" line uses whatever real, specific thing you found (their new bay, a product line, the job they're supplying); never invent one.
+
+Give the niche hunt the same effort as the regular hunt: at least 8 different searches before you settle for fewer.
+
+If `focus` or `notes` say to skip or favor a niche, follow that.
 
 ### 4. Research each target
 For each company, find out:
@@ -209,6 +224,7 @@ Use one `ArtifactData` `batch` (up to 50 writes). New documents only, so omit `i
   "website": "gulfcoastcivil.com",
   "freight": "Heavy haul",
   "source": "Award hunt",
+  "niche": "<fabricators | equipment | precast | power | farm, only for niche hunt leads; leave it out otherwise>",
   "stage": "new",
   "nextFollowUp": "<t1 due date, YYYY-MM-DD>",
   "notes": "",
@@ -244,6 +260,7 @@ Every lead must include `report`. `source` is `Award hunt` for awards and projec
   "at": "<ISO timestamp>",
   "slot": "morning",
   "region": "Midwest and Great Lakes",
+  "niche": "precast",
   "status": "ok | partial | failed | paused",
   "newLeads": 6,
   "touchesWritten": 36,
@@ -252,7 +269,7 @@ Every lead must include `report`. `source` is `Award hunt` for awards and projec
 }
 ```
 
-The brief is plain text under 120 words, written to Kyle: how many new leads, the top 3 with the one-line reason each is worth his time today, how many outreach touches are due today, and anything he should know (a source that was down, an area running dry). No markdown symbols.
+The brief is plain text under 120 words, written to Kyle: how many new leads (and how many came from the niche hunt, naming the niche), the top 3 with the one-line reason each is worth his time today, how many outreach touches are due today, and anything he should know (a source that was down, an area running dry). No markdown symbols.
 
 Use `status: "partial"` if you added fewer leads than asked because evidence was thin, and `failed` if something broke. Always write the run document, even on failure, with `problems` saying what went wrong.
 

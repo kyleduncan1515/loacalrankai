@@ -126,6 +126,13 @@ section.view { display: grid; gap: 22px; min-width: 0; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* Pipeline */
+.niche-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.niche { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; cursor: pointer; display: grid; gap: 4px; text-align: left; width: 100%; color: inherit; font: inherit; }
+.niche:hover { border-color: var(--accent); }
+.niche[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.niche .n { font-size: 24px; font-weight: 700; }
+.niche .lbl { font-weight: 600; font-size: 14px; }
+.niche .why { font-size: 12px; color: var(--muted); }
 .board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .col { background: var(--sunk); border-radius: 8px; padding: 10px; display: grid; gap: 8px; align-content: start; min-width: 0; }
 .col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding: 2px 2px 4px; }
@@ -293,6 +300,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       <button class="tab" role="tab" data-view="today" id="tab-today" type="button">Today</button>
       <button class="tab" role="tab" data-view="pipeline" id="tab-pipeline" type="button">Pipeline</button>
       <button class="tab" role="tab" data-view="leads" id="tab-leads" type="button">All leads</button>
+      <button class="tab" role="tab" data-view="niche" id="tab-niche" type="button">Niche</button>
       <button class="tab" role="tab" data-view="score" id="tab-score" type="button">Scoreboard</button>
       <button class="tab" role="tab" data-view="machine" id="tab-machine" type="button">Machine</button>
       <button class="tab" role="tab" data-view="goals" id="tab-goals" type="button">Goals &amp; pay</button>
@@ -353,6 +361,19 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       <table>
         <thead><tr><th>Company</th><th>Vetting</th><th class="r">Close</th><th>Contact</th><th>Stage</th><th>Freight</th><th>Source</th><th>Next follow-up</th><th class="r">Loads</th></tr></thead>
         <tbody id="lead-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- NICHE -->
+  <section class="view" id="view-niche" hidden>
+    <div class="sec-head"><h2>Niche markets</h2><span class="count" id="niche-count"></span></div>
+    <p class="help" style="margin:0">Steady, overlooked shippers that big brokers skip. Every shift hunts one of these five, nationwide. Pick a card to filter.</p>
+    <div class="niche-grid" id="niche-cards"></div>
+    <div class="panel table-wrap">
+      <table>
+        <thead><tr><th>Company</th><th>Niche</th><th>Vetting</th><th class="r">Close</th><th>Contact</th><th>Stage</th><th>Next follow-up</th></tr></thead>
+        <tbody id="niche-rows"></tbody>
       </table>
     </div>
   </section>
@@ -765,7 +786,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       (!q || [l.company, l.contactName, l.contactTitle, l.location, l.notes, l.phone, l.email].some((v) => (v || "").toLowerCase().includes(q)))
     ).sort((a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage] || (Number(b.report?.closeScore) || 0) - (Number(a.report?.closeScore) || 0) || (a.company || "").localeCompare(b.company || ""));
     $("lead-rows").innerHTML = rows.length ? rows.map((l) => `<tr data-open="${esc(l.id)}" tabindex="0">
-      <td><b>${esc(l.company || "Untitled lead")}</b>${l.example ? ' <span class="chip example">Example</span>' : ""}${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
+      <td><b>${esc(l.company || "Untitled lead")}</b>${nicheChip(l)}${l.example ? ' <span class="chip example">Example</span>' : ""}${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
       <td>${verdictChip(l, false)}</td>
       <td class="r">${closeChip(l) || '<span class="muted">–</span>'}</td>
       <td>${esc(l.contactName)}${l.contactTitle ? `<div class="muted" style="font-size:13px">${esc(l.contactTitle)}</div>` : ""}</td>
@@ -773,6 +794,36 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
       <td>${l.nextFollowUp ? `<span class="chip ${followState(l) === "overdue" ? "overdue" : followState(l) === "due" ? "due" : ""}">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}</td>
       <td class="r num">${(l.loads || []).length || ""}</td></tr>`).join("")
       : `<tr><td colspan="9" class="empty">${leads.size ? "No leads match these filters." : "No leads yet. Add one or import a list."}</td></tr>`;
+  }
+
+  const NICHES = [
+    { id: "fabricators", label: "Tank, vessel and skid fabricators", short: "Fabricator", why: "Oversize, permitted loads every time a job ships" },
+    { id: "equipment", label: "Equipment rental yards and dealers", short: "Equipment yard", why: "Lowboy and step deck moves every week" },
+    { id: "precast", label: "Precast, culvert and pipe makers", short: "Precast", why: "Heavy flatbed freight for every civil job" },
+    { id: "power", label: "Power and data center equipment", short: "Power gear", why: "Transformers and switchgear, short on heavy-haul capacity" },
+    { id: "farm", label: "Farm equipment dealers", short: "Farm equipment", why: "Step deck moves, busiest before planting and harvest" },
+  ];
+  const NICHE_BY_ID = Object.fromEntries(NICHES.map((n) => [n.id, n]));
+  let nicheFilter = "";
+  function nicheChip(l) { const n = NICHE_BY_ID[l.niche]; return n ? ` <span class="chip">${esc(n.short)}</span>` : ""; }
+  function renderNiche() {
+    const all = [...leads.values()].filter((l) => NICHE_BY_ID[l.niche]);
+    $("niche-count").textContent = `${all.length} lead${all.length === 1 ? "" : "s"}`;
+    $("niche-cards").innerHTML = NICHES.map((n) => {
+      const c = all.filter((l) => l.niche === n.id).length;
+      return `<button class="niche" type="button" data-niche="${n.id}" aria-pressed="${nicheFilter === n.id}"><span class="n num">${c}</span><span class="lbl">${esc(n.label)}</span><span class="why">${esc(n.why)}</span></button>`;
+    }).join("");
+    const rows = all.filter((l) => !nicheFilter || l.niche === nicheFilter)
+      .sort((a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage] || (Number(b.report?.closeScore) || 0) - (Number(a.report?.closeScore) || 0) || (a.company || "").localeCompare(b.company || ""));
+    $("niche-rows").innerHTML = rows.length ? rows.map((l) => `<tr data-open="${esc(l.id)}" tabindex="0">
+      <td><b>${esc(l.company || "Untitled lead")}</b>${l.location ? `<div class="muted" style="font-size:13px">${esc(l.location)}</div>` : ""}</td>
+      <td>${esc(NICHE_BY_ID[l.niche].short)}</td>
+      <td>${verdictChip(l, false)}</td>
+      <td class="r">${closeChip(l) || '<span class="muted">–</span>'}</td>
+      <td>${esc(l.contactName)}${l.contactTitle ? `<div class="muted" style="font-size:13px">${esc(l.contactTitle)}</div>` : ""}</td>
+      <td>${stageChip(l.stage)}</td>
+      <td>${l.nextFollowUp ? `<span class="chip ${followState(l) === "overdue" ? "overdue" : followState(l) === "due" ? "due" : ""}">${esc(fmtDay(l.nextFollowUp))}</span>` : ""}</td></tr>`).join("")
+      : `<tr><td colspan="7" class="empty">${nicheFilter ? "No leads in this niche yet." : "No niche leads yet. The machine adds them every shift."}</td></tr>`;
   }
 
   function weekChart() {
@@ -862,6 +913,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     if (view === "today") renderToday();
     if (view === "pipeline") renderPipeline();
     if (view === "leads") renderLeads();
+    if (view === "niche") renderNiche();
     if (view === "score") renderScore();
     if (view === "machine") renderMachine();
     const typing = document.activeElement && $("sheet").contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
@@ -1338,6 +1390,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   // ---------- wiring ----------
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => { setView(t.dataset.view); try { history.replaceState(null, "", "#" + t.dataset.view); } catch {} }));
   document.querySelectorAll("[data-range]").forEach((b) => b.addEventListener("click", () => { range = b.dataset.range; renderScore(); }));
+  $("niche-cards").addEventListener("click", (e) => { const b = e.target.closest("[data-niche]"); if (!b) return; nicheFilter = nicheFilter === b.dataset.niche ? "" : b.dataset.niche; renderNiche(); });
   document.addEventListener("click", (e) => {
     const o = e.target.closest("[data-open]");
     if (o && !e.target.closest("#sheet")) {
@@ -1397,7 +1450,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   });
 
   const start = (location.hash || "").replace("#", "");
-  setView(["today", "pipeline", "leads", "score", "machine", "goals"].includes(start) ? start : "today");
+  setView(["today", "pipeline", "leads", "niche", "score", "machine", "goals"].includes(start) ? start : "today");
   connect();
 })();
 </script>
