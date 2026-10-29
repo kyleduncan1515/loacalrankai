@@ -24,7 +24,7 @@ Kyle is an independent agent for Summit Transit LLC, a freight brokerage in Humb
 ## The shift
 
 ### 1. Read the controls
-Get `settings/machine`. If it doesn't exist, use the defaults: `paused: false`, `newLeadsPerRun: 8`, `area: "Nationwide"`, `focus: ""`, `notes: ""`.
+Get `settings/machine`. If it doesn't exist, use the defaults: `paused: false`, `newLeadsPerRun: 8`, `minCloseScore: 6`, `area: "Nationwide"`, `focus: ""`, `notes: ""`.
 
 If `paused` is true, write the run document (step 6) with `status: "paused"`, `newLeads: 0`, `touchesWritten: 0` and the brief "Paused from the Machine tab. No new leads this shift." Then stop.
 
@@ -32,7 +32,7 @@ If `paused` is true, write the run document (step 6) with `status: "paused"`, `n
 List `leads` (limit 1000). Note every company name, normalized to lowercase with "inc", "llc", "co" and punctuation removed, so you never add one twice. Ignore leads with `example: true` for everything except duplicate checks. Count the outreach due today: touches with `status: "ready"` and `due` on or before today, on leads whose `stage` is `new` or `contacted`.
 
 ### 3. Hunt
-Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. **Split them evenly between the regular hunt below and the niche hunt (3b):** half regular, half niche, and when the number is odd the extra one goes to the niche hunt. Use web search and web fetch. Summit works with shippers anywhere in the US, so when `area` is "Nationwide" (the default), hunt the whole country.
+`newLeadsPerRun` is the most leads to add, not a quota. Kyle wants quality over count: a dead lead clogs his pipeline and wastes his calls, so every lead must pass the quality gate (step 4c) before it goes in the desk. Gather about twice as many candidates as you need, research them all properly, and add only the ones that pass. Hunt in `area`, following `focus` and `notes`. **Split them evenly between the regular hunt below and the niche hunt (3b):** half regular, half niche, and when the number is odd the extra one goes to the niche hunt. Use web search and web fetch. Summit works with shippers anywhere in the US, so when `area` is "Nationwide" (the default), hunt the whole country.
 
 **Rotate regions.** So the leads don't all come from one place, each shift hunts one region. Read the last few `runs` documents, then pick the region hunted least recently (on a tie, take the next one in this order), and save it as `region` in this run's document:
 1. Texas and Louisiana
@@ -63,7 +63,7 @@ If `area` names a specific place (a state, a city, "Texas only"), hunt only ther
 
 Prefer the last 30 days. Favor fit with Summit's services: local, nationwide long haul, oversized and heavy haul, and reefer. A shipper anywhere in the US is a fit, and oversized freight (modules, vessels, transformers, structures, heavy equipment) is a strength worth hunting for.
 
-Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. Only then add fewer than asked. Quality still beats count: never add a target without real evidence.
+Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. Only then settle for fewer. Quality always beats count: zero leads with an honest brief is better than one dead lead.
 
 ### 3b. Niche hunt
 Kyle hunts five overlooked markets as hard as everything else. These are steady, repeat shippers that big brokers skip, often too small to have a logistics department, so whoever books their truck is usually the owner, shop manager or yard manager. Each shift hunts one niche, nationwide, inside the shift's region. Read the last few `runs` documents and pick the niche hunted least recently (on a tie, the next one in this order), and save its id as `niche` in this run's document.
@@ -135,6 +135,19 @@ The report goes in the lead document as `report`:
 }
 ```
 Give 3–8 past-work entries when the record has them, and 2–4 talking points. Every past-work entry and watch-out needs a source when one exists.
+
+### 4c. Quality gate
+Research every candidate as deeply as the Harris County leads were researched: confirm the trigger in a primary source, check the company is real and active, find out how it really buys freight, and find a way to reach it. You don't need county paperwork for a private company, but you do need to do the homework before deciding. Decide only after steps 4 and 4b are done for that candidate.
+
+A lead goes in the desk only if **all** of these are true:
+- **The reason to call is real and current.** It's confirmed by a primary source: the company's own site or press release, a government or court record, a permit, a DOT or utility record, or two independent news reports that agree. For the regular hunt the signal is from the last 90 days, or it's an older project that is clearly still active (shipping, building or hiring now). Niche leads need either a recent signal or clear evidence the company ships the niche's freight today.
+- **The company is alive.** A working website or recent activity (news, job posts, records from the last year). Not closed, sold off or in bankruptcy.
+- **There's a way in.** At least a confirmed main phone number from the company's own site or official listing, and you know which role to ask for. A named person or published email is better.
+- **Summit can win it.** It ships freight a broker can move (not all on its own fleet, unless the job needs equipment it doesn't have), and nothing suggests every load is locked into a national carrier contract or 3PL.
+- **The verdict isn't red.**
+- **The close score is at least `minCloseScore`.** Score honestly first, then apply the cutoff. Never raise a score to get a lead past the gate.
+
+If a candidate fails, don't add it. List it in the run document's `skipped` with the company, its score if you got that far, and the reason in a few words, so Kyle can see the homework. Then go find a better candidate if you have time. Big national and global companies (Fortune 1000, foreign multinationals, the big national contractors) rarely pass: their freight runs through procurement and contract carriers. Prefer small and mid-size companies where the person who books trucks is reachable.
 
 ### 5. Write the outreach sequence
 **No email found? Call first.** If you couldn't find a published email for the right person, the sequence starts with an extra touch, `t0`, a call to the company's main line to find the right person. It's due on the first-touch day, and every other touch moves one business day later. Write `t0` as a short, friendly script:
@@ -261,6 +274,7 @@ Every lead must include `report`. `source` is `Award hunt` for awards and projec
   "slot": "morning",
   "region": "Midwest and Great Lakes",
   "niche": "precast",
+  "skipped": [ { "company": "Example Corp", "closeScore": 3, "why": "National retailer with a contracted carrier program" } ],
   "status": "ok | partial | failed | paused",
   "newLeads": 6,
   "touchesWritten": 36,
@@ -269,9 +283,9 @@ Every lead must include `report`. `source` is `Award hunt` for awards and projec
 }
 ```
 
-The brief is plain text under 120 words, written to Kyle: how many new leads (and how many came from the niche hunt, naming the niche), the top 3 with the one-line reason each is worth his time today, how many outreach touches are due today, and anything he should know (a source that was down, an area running dry). No markdown symbols.
+The brief is plain text under 120 words, written to Kyle: how many new leads (and how many came from the niche hunt, naming the niche), how many candidates you researched and turned away, the top 3 with the one-line reason each is worth his time today, how many outreach touches are due today, and anything he should know (a source that was down, an area running dry). No markdown symbols.
 
-Use `status: "partial"` if you added fewer leads than asked because evidence was thin, and `failed` if something broke. Always write the run document, even on failure, with `problems` saying what went wrong.
+Adding fewer leads than `newLeadsPerRun` because candidates failed the quality gate is still `status: "ok"`. Use `"partial"` only if something kept you from researching properly (sources down, ran out of time), and `failed` if something broke. Always write the run document, even on failure, with `problems` saying what went wrong.
 
 ### 7. Check your work
 Read back the run document and one new lead with `ArtifactData` `get` to confirm they saved. End the shift with a two-line summary.

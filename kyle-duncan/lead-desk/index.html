@@ -416,13 +416,14 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   <section class="view" id="view-machine" hidden>
     <div class="block">
       <div class="brief-head"><h3>Machine status</h3><span id="m-status" class="muted"></span></div>
-      <p class="help" style="margin:0">The machine runs on its own every weekday around 6:40am and 12:40pm Houston time. Each run it hunts new freight leads anywhere in the US, rotating through six regions so every part of the country gets covered, researches them, writes the full outreach sequence for each one into this desk, and leaves you a brief. It never sends anything or contacts anyone. You do that from <b>Outreach due</b> on the Today tab.</p>
+      <p class="help" style="margin:0">The machine runs on its own every weekday around 6:40am and 12:40pm Houston time. Each run it hunts new freight leads anywhere in the US, rotating through six regions so every part of the country gets covered, researches every candidate in depth, keeps only the ones that score at or above your lowest close score, writes the full outreach sequence for each one into this desk, and leaves you a brief. It never sends anything or contacts anyone. You do that from <b>Outreach due</b> on the Today tab.</p>
     </div>
     <div class="block">
       <h3>Controls</h3>
       <label class="toggle" for="m-paused"><input type="checkbox" id="m-paused"> Pause the machine</label>
       <div class="form-grid">
         <div class="field"><label for="m-per-run">New leads per run</label><input id="m-per-run" type="number" min="0" max="25"></div>
+        <div class="field"><label for="m-min-close">Lowest close score to bring in</label><input id="m-min-close" type="number" min="1" max="10"></div>
         <div class="field"><label for="m-area">Hunting area</label><input id="m-area" placeholder="Nationwide, or a state or city"></div>
         <div class="field wide"><label for="m-focus">Focus</label><input id="m-focus" placeholder="e.g. heavy haul for pipeline and highway jobs, reefer shippers in the Midwest"></div>
         <div class="field wide"><label for="m-notes">Standing instructions for the machine</label><textarea id="m-notes" placeholder="e.g. Skip anything under $250k. Don't target national carriers or other brokers."></textarea></div>
@@ -496,7 +497,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   const CHANNEL_LABEL = { email: "Email", call: "Call", voicemail: "Voicemail", linkedin: "LinkedIn" };
   const CHANNEL_ACTIVITY = { email: "email", call: "call", voicemail: "call", linkedin: "linkedin" };
   const OPEN_STAGES = new Set(["new", "contacted"]);
-  const DEFAULT_MACHINE = { paused: false, newLeadsPerRun: 8, area: "Nationwide", focus: "", notes: "" };
+  const DEFAULT_MACHINE = { paused: false, newLeadsPerRun: 8, minCloseScore: 6, area: "Nationwide", focus: "", notes: "" };
   const COUNTS_AS_CONTACT = new Set(["call", "email", "text", "linkedin", "visit"]);
   const DISPATCH_PHONE = "713-824-7168";
   const DISPATCH_EMAIL = "Summit-Dispatch@summittransitllc.com";
@@ -625,11 +626,13 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
   function fillMachineForm() {
     $("m-paused").checked = !!machine.paused;
     $("m-per-run").value = machine.newLeadsPerRun ?? "";
+    $("m-min-close").value = machine.minCloseScore ?? DEFAULT_MACHINE.minCloseScore;
     $("m-area").value = machine.area || ""; $("m-focus").value = machine.focus || ""; $("m-notes").value = machine.notes || "";
     machineDirty = false;
   }
   async function saveMachine() {
     machine = { ...machine, paused: $("m-paused").checked, newLeadsPerRun: Math.max(0, Math.min(25, num($("m-per-run").value) ?? DEFAULT_MACHINE.newLeadsPerRun)),
+      minCloseScore: Math.max(1, Math.min(10, num($("m-min-close").value) ?? DEFAULT_MACHINE.minCloseScore)),
       area: $("m-area").value.trim(), focus: $("m-focus").value.trim(), notes: $("m-notes").value.trim(), updatedAt: nowIso() };
     machineDirty = false;
     renderAll();
@@ -901,8 +904,9 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     $("m-status").innerHTML = machine.paused ? `<span class="status-dot paused"></span>Paused` : r ? `<span class="status-dot ${r.status === "failed" ? "failed" : ""}"></span>Last run ${esc(fmtWhen(r.at))}` : "Waiting for its first run";
     $("run-count").textContent = runs.length ? `${runs.length} recent` : "";
     $("run-list").innerHTML = runs.length ? runs.map((x) => `<li>
-      <div class="brief-head"><b>${esc(fmtWhen(x.at))} · ${esc(x.slot || "run")}${x.region ? " · " + esc(x.region) : ""}</b><span class="tags">${x.status && x.status !== "ok" ? `<span class="chip ${x.status === "failed" ? "overdue" : "due"}">${esc(x.status)}</span>` : ""}<span class="chip">${esc(x.newLeads ?? 0)} leads</span><span class="chip">${esc(x.touchesWritten ?? 0)} touches</span></span></div>
+      <div class="brief-head"><b>${esc(fmtWhen(x.at))} · ${esc(x.slot || "run")}${x.region ? " · " + esc(x.region) : ""}</b><span class="tags">${x.status && x.status !== "ok" ? `<span class="chip ${x.status === "failed" ? "overdue" : "due"}">${esc(x.status)}</span>` : ""}<span class="chip">${esc(x.newLeads ?? 0)} leads</span><span class="chip">${esc(x.touchesWritten ?? 0)} touches</span>${Array.isArray(x.skipped) && x.skipped.length ? `<span class="chip">${x.skipped.length} turned away</span>` : ""}</span></div>
       ${x.brief ? `<details><summary>Brief</summary><div class="brief-text" style="margin-top:6px">${esc(x.brief)}</div></details>` : ""}
+      ${Array.isArray(x.skipped) && x.skipped.length ? `<details><summary>Turned away</summary><ul class="help" style="margin:6px 0 0;padding-left:18px">${x.skipped.map((k) => `<li><b>${esc(k.company)}</b>${k.closeScore ? ` (close ${esc(k.closeScore)}/10)` : ""}: ${esc(k.why)}</li>`).join("")}</ul></details>` : ""}
       ${x.problems ? `<div class="help">Problems: ${esc(x.problems)}</div>` : ""}</li>`).join("")
       : `<li class="empty">No runs yet.</li>`;
   }
@@ -1428,7 +1432,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
     const head = `Kyle Duncan: companies contacted ${new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })} (${touched.length})`;
     copy(head + "\n\n" + lines.join("\n\n"), `Copied ${touched.length} compan${touched.length === 1 ? "y" : "ies"}. Paste it to dispatch.`);
   });
-  ["m-paused", "m-per-run", "m-area", "m-focus", "m-notes"].forEach((id) => $(id).addEventListener("input", () => (machineDirty = true)));
+  ["m-paused", "m-per-run", "m-min-close", "m-area", "m-focus", "m-notes"].forEach((id) => $(id).addEventListener("input", () => (machineDirty = true)));
   $("btn-save-goals").addEventListener("click", () => {
     settings = { ...settings, commissionPct: num($("g-pct").value), sendWith: $("g-sendwith").value, sendAs: $("g-sendas").value.trim(),
       goals: { leads: num($("g-leads").value), contacts: num($("g-contacts").value), handoffs: num($("g-handoffs").value), loads: num($("g-loads").value), monthlyEarnings: num($("g-earn").value) } };
