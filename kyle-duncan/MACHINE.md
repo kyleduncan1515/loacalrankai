@@ -51,7 +51,7 @@ Find `newLeadsPerRun` new targets in `area`, following `focus` and `notes`. Use 
   **Confirm county and city awards in the official record before using them.** Local news recap sites sometimes get awards wrong. If Legistar (or the city's equivalent) doesn't show the award, don't use it as the trigger.
 - **Afternoon shift: shippers with a fresh signal.** New or expanding plants, warehouses and distribution centers; manufacturers and distributors hiring logistics or shipping staff; food, produce and beverage shippers heading into a peak; importers moving freight off Port Houston; building materials and steel suppliers.
 
-Prefer the last 30 days. Favor fit with Summit's services (local, long haul, heavy haul, reefer) and closeness to Houston.
+Prefer the last 30 days. Favor fit with Summit's services: local, nationwide long haul, oversized and heavy haul, and reefer. Summit hauls nationwide, so a Houston-area shipper sending freight anywhere in the US is a fit, and oversized freight (modules, vessels, structures, heavy equipment) is a strength worth hunting for.
 
 Work hard before you settle for fewer. Run at least 12 different searches across at least 3 kinds of source (for example award listings, local business news, company press releases, job postings, economic development announcements) before you decide evidence is thin. If a page won't load (some hosts are blocked from this environment), don't stop there: find the same story somewhere else, such as the company's own newsroom, PR Newswire, Business Wire, GlobeNewswire, a local TV or newspaper site, or a trade publication. Only then add fewer than asked. Quality still beats count: never add a target without real evidence.
 
@@ -128,7 +128,7 @@ Writing rules. These override the playbook's writing section wherever they diffe
 **First email (t1)** follows this shape:
 1. "Hi <first name>," or "Hi there,"
 2. One or two sentences acknowledging their news, specifically and genuinely ("I read that ... Congratulations, that's a big step.").
-3. Who Kyle is (the line above), then one or two sentences on how Summit could help with the freight their news creates, naming the real equipment or kind of load, plus backup coverage when a regular carrier falls through.
+3. Who Kyle is (the line above), then one or two sentences on how Summit could help with the freight their news creates, naming the real equipment or kind of load, plus backup coverage when a regular carrier falls through. Mention that Summit moves freight nationwide, including oversized loads, whenever it fits their freight (it usually does).
 4. The ask: "If you have a lane you'd like priced, our dispatch team can put a quote together for you at 713-824-7168 or Summit-Dispatch@summittransitllc.com."
 5. A warm close tied to their news ("Thanks for your time, and best of luck with the expansion.")
 
@@ -153,7 +153,7 @@ Thanks for your time, and best of luck with the expansion.
 **Last email (t6):** "I don't want to fill up your inbox, so this will be my last note for now." Then one sentence pointing to dispatch for a second option, and a kind sign-off about their news.
 
 **All emails:**
-- 50–110 words, not counting the signature and footer. Short paragraphs.
+- 50–140 words, not counting the signature and footer. Short paragraphs.
 - Subject lines in normal sentence capitalization, 3–7 words, specific and friendly ("Your new Houston distribution center", "Lanes out of the Houston DC", "One last note"). No clickbait.
 - Never write "I hope this finds you well", "touching base", "just checking in", "circling back", or buzzwords ("synergy", "solutions", "leverage", "seamless", "best-in-class").
 - The ask always points to Summit's dispatch, never back to Kyle. Never ask them to mention Kyle's name or say who referred them. Never say dispatch quotes "instantly" or "on the spot".
