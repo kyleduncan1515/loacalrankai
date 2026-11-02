@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Outreach toolkit: prospect data, generated previews, and your personal config stay local
+data/
+demos/
+tools/config.json

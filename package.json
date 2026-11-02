@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "leads": "node tools/find-leads.mjs",
+    "audit": "node tools/audit-sites.mjs",
+    "demos": "node tools/make-demos.mjs",
+    "emails": "node tools/write-emails.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",
