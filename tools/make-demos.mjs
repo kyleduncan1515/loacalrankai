@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Step 3: build a free, personalized preview website for each top prospect.
 // Output goes to demos/<slug>/index.html — deploy the demos/ folder free on Cloudflare Pages.
-// Usage: node tools/make-demos.mjs --in data/leads-...-audited.csv [--top 25]
+// Usage: node tools/make-demos.mjs --in data/leads-...-audited.csv [--top 25] [--include-no-email]
+// By default only builds previews for businesses we can actually email.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs, loadConfig, slugify, esc, ROOT } from './lib/util.mjs';
@@ -77,7 +78,9 @@ footer{padding:28px 20px;text-align:center;color:var(--muted);font-size:14px;bor
 </body></html>`;
 }
 
-const leads = readCsv(args.in).filter((l) => Number(l.score) > 0).slice(0, top);
+const leads = readCsv(args.in)
+  .filter((l) => Number(l.score) > 0 && (l.email || args['include-no-email']))
+  .slice(0, top);
 for (const lead of leads) {
   const slug = demoSlug(lead);
   mkdirSync(join(DEMOS, slug), { recursive: true });

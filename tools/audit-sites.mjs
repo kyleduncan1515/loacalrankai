@@ -34,6 +34,12 @@ async function audit(lead) {
     const html = (await res.text()).slice(0, 500_000);
     const secs = (Date.now() - started) / 1000;
     r.load_seconds = secs.toFixed(1);
+    if ([401, 403, 406, 429].includes(res.status)) {
+      // Usually bot protection (e.g. Cloudflare), not a broken site. Don't claim it's down.
+      r.status = 'unchecked';
+      r.issues = `could not check (site blocked our checker, HTTP ${res.status})`;
+      return r;
+    }
     if (!res.ok) {
       r.status = 'broken';
       r.score = 90;
@@ -71,9 +77,9 @@ async function audit(lead) {
 const leads = readCsv(args.in);
 console.log(`Auditing ${leads.length} businesses...`);
 let done = 0;
-const results = await mapLimit(leads, 6, async (l) => {
+const results = await mapLimit(leads, Number(args.concurrency ?? 10), async (l) => {
   const r = await audit(l);
-  process.stdout.write(`\r  ${++done}/${leads.length}`);
+  if (++done % 100 === 0 || done === leads.length) process.stdout.write(process.stdout.isTTY ? `\r  ${done}/${leads.length}` : `  ${done}/${leads.length}\n`);
   return r;
 });
 results.sort((a, b) => b.score - a.score);

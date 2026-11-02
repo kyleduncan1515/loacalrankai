@@ -19,7 +19,7 @@ function opener(lead, n) {
   const city = lead.city.split(',')[0];
   const issues = lead.issues.toLowerCase();
   if (lead.status === 'no-website')
-    return `I was looking for ${n.plural} in ${city} and noticed ${lead.name} doesn't have a website, so a lot of ${n.pain} never find you.`;
+    return `I was looking for ${n.plural} in ${city} and couldn't find a website for ${lead.name}. If you don't have one yet, a lot of ${n.pain} may never find you.`;
   if (lead.status === 'down' || lead.status === 'broken')
     return `I tried to visit your website (${lead.website}) and it wouldn't load for me. That means ${n.pain} are probably landing on a competitor instead.`;
   if (issues.includes('mobile'))
@@ -28,6 +28,8 @@ function opener(lead, n) {
     return `When I opened ${lead.website}, my browser flagged it as "Not secure," which scares off a lot of ${n.pain}.`;
   if (issues.includes('outdated'))
     return `I came across ${lead.website} and it looks like it hasn't been updated in a while (${lead.copyright_year}).`;
+  if (issues.includes('tap-to-call'))
+    return `I pulled up ${lead.website} on my phone and there's no tap-to-call button, so ${n.pain} have to copy your number by hand. A lot of them just call the next business instead.`;
   return `I came across ${lead.name} while looking at ${n.plural} in ${city} and saw a few quick wins for your site and Google listing.`;
 }
 
@@ -49,7 +51,8 @@ function emails(lead) {
 }
 
 const all = readCsv(args.in);
-const withEmail = all.filter((l) => l.email).slice(0, top);
+// Only email businesses where we found a real, specific problem to talk about.
+const withEmail = all.filter((l) => l.email && Number(l.score) > 0).slice(0, top);
 const rows = withEmail.map((l) => ({ email: l.email, name: l.name, phone: l.phone, demo_url: l.demo_url ?? '', ...emails(l) }));
 const base = args.in.replace(/leads-/, 'emails-').replace(/-audited\.csv$|\.csv$/, '');
 writeCsv(`${base}.csv`, rows);
