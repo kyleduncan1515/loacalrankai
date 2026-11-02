@@ -96,8 +96,11 @@ const FAKE_OR_CORPORATE_EMAIL = /@(mysite|mystore|example|domain|yourdomain|emai
 const NOT_A_BUSINESS = /\b(planet beach|local \d+|union|church|ministr|school|academy of|association|chamber|city of|county|isd|chevrolet|ford|toyota|honda|nissan|hyundai|kia|dodge|jeep|subaru|mazda|bmw|mercedes|lexus|dealership)\b/i;
 const withEmail = all
   .filter((l) => l.email && Number(l.score) >= 10 && !NOT_A_BUSINESS.test(l.name) && !FAKE_OR_CORPORATE_EMAIL.test(l.email))
+  // Texas only, and skip places like military bases and airports (concessions, not independent shops).
+  .filter((l) => !/,\s*(?!TX)[A-Z]{2}\s*$/.test(l.city) && !/\bNM\b|New Mexico/.test(l.address) && !/fort bliss|dfw airport/i.test(`${l.city} ${l.address}`))
   // Drop weak "problems" (recent copyright year, site-builder only) and keep leads that still have a real one.
-  .map((l) => ({ ...l, issues: l.issues.split('; ').filter((i) => i && i !== 'basic site builder'
+  // "Slow" is measured from our server (through a proxy), so it isn't reliable enough to claim.
+  .map((l) => ({ ...l, issues: l.issues.split('; ').filter((i) => i && i !== 'basic site builder' && !i.startsWith('slow to load')
     && !(i.startsWith('looks outdated') && Number(l.copyright_year) > new Date().getFullYear() - 4)).join('; ') }))
   .filter((l) => l.status !== 'ok' || l.issues)
   // one email per inbox and per business, even if they list two addresses or own two locations
