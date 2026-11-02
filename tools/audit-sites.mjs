@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Step 2: check each lead's website and rank who most needs help.
 // Usage: node tools/audit-sites.mjs --in data/leads-roofer-dallas-tx.csv
+import { lookup } from 'node:dns/promises';
 import { parseArgs, mapLimit } from './lib/util.mjs';
 import { readCsv, writeCsv } from './lib/csv.mjs';
 
@@ -41,7 +42,7 @@ async function audit(lead) {
     const html = (await res.text()).slice(0, 4_000_000);
     const secs = (Date.now() - started) / 1000;
     r.load_seconds = secs.toFixed(1);
-    if ([401, 403, 406, 429].includes(res.status)) {
+    if ([401, 403, 406, 429, 503].includes(res.status)) {
       // Usually bot protection (e.g. Cloudflare), not a broken site. Don't claim it's down.
       r.status = 'unchecked';
       r.issues = `could not check (site blocked our checker, HTTP ${res.status})`;
@@ -76,9 +77,18 @@ async function audit(lead) {
       } catch { /* page missing or slow; skip */ }
     }
   } catch (err) {
-    r.status = 'down';
-    r.score = 95;
-    issues.push(`site won't load (${err.name === 'TimeoutError' ? 'timed out' : err.message})`);
+    // Only call a site "down" when we're sure: its domain no longer exists. Anything else
+    // (timeouts, network hiccups on our side) might be our problem, not theirs.
+    const host = new URL(normalizeUrl(lead.website)).hostname;
+    const dead = await lookup(host).then(() => false, (e) => e.code === 'ENOTFOUND');
+    if (dead) {
+      r.status = 'down';
+      r.score = 95;
+      issues.push('domain no longer works');
+    } else {
+      r.status = 'unchecked';
+      issues.push(`could not check (${err.name === 'TimeoutError' ? 'timed out' : 'connection failed'})`);
+    }
   }
   r.issues = issues.join('; ');
   return r;

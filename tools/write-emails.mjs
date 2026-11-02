@@ -20,8 +20,10 @@ function opener(lead, n) {
   const issues = lead.issues.toLowerCase();
   if (lead.status === 'no-website')
     return `I was looking for ${n.plural} in ${city} and couldn't find a website for ${lead.name}. If you don't have one yet, a lot of ${n.pain} may never find you.`;
-  if (lead.status === 'down' || lead.status === 'broken')
-    return `I tried to visit your website (${lead.website}) and it wouldn't load for me. That means ${n.pain} are probably landing on a competitor instead.`;
+  if (lead.status === 'broken')
+    return `I tried to visit your website (${lead.website}) and it showed an error page instead of your site. That means ${n.pain} are probably landing on a competitor instead.`;
+  if (lead.status === 'down')
+    return `I tried to visit your website (${lead.website}) and the address doesn't work anymore. That means ${n.pain} are probably landing on a competitor instead.`;
   if (issues.includes('mobile'))
     return `I pulled up ${lead.website} on my phone and it isn't built for mobile, so it's hard to read and tap. Most ${n.pain} are on a phone.`;
   if (issues.includes('https'))
@@ -56,9 +58,16 @@ function emails(lead) {
 const all = readCsv(args.in);
 // Only email businesses where we found a real, specific problem to talk about.
 const sentTo = new Set();
+const NOT_A_BUSINESS = /\b(local \d+|union|church|ministr|school|academy of|association|chamber|city of|county|isd)\b/i;
 const withEmail = all
-  .filter((l) => l.email && Number(l.score) >= 10)
-  .filter((l) => !sentTo.has(l.email) && sentTo.add(l.email)) // one email per inbox, even if they own two businesses
+  .filter((l) => l.email && Number(l.score) >= 10 && !NOT_A_BUSINESS.test(l.name))
+  // one email per inbox and per business, even if they list two addresses or own two locations
+  .filter((l) => {
+    const keys = [l.email.toLowerCase(), `name:${l.name.toLowerCase()}`];
+    if (keys.some((k) => sentTo.has(k))) return false;
+    keys.forEach((k) => sentTo.add(k));
+    return true;
+  })
   .slice(0, top);
 const rows = withEmail.map((l) => ({ email: l.email, name: l.name, phone: l.phone, demo_url: l.demo_url ?? '', ...emails(l) }));
 const base = args.in.replace(/leads-/, 'emails-').replace(/-audited\.csv$|\.csv$/, '');
