@@ -4,9 +4,10 @@
 //        --niche all            every business type in lib/niches.mjs
 //        --niche plumber,hvac   a comma-separated list
 import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs, DATA, slugify } from './lib/util.mjs';
 import { getNiche, ALL_NICHES } from './lib/niches.mjs';
-import { writeCsv } from './lib/csv.mjs';
+import { writeCsv, readCsv } from './lib/csv.mjs';
 
 const UA = 'LocalRankAI-lead-finder/1.0 (small business outreach research)';
 const OVERPASS = [
@@ -67,9 +68,16 @@ console.log(`Searching ${box.display}`);
 const bbox = `${box.s},${box.w},${box.n},${box.e}`;
 const cityName = args.city.split(',')[0].trim().toLowerCase();
 
-const seen = new Set();
-const leads = [];
+const label = nicheKeys.length > 1 ? (args.niche === 'all' ? 'all' : 'mixed') : nicheKeys[0];
+const out = args.out ?? join(DATA, `leads-${label}-${slugify(args.city)}.csv`);
+// Resume support: results are saved after every business type, so an interrupted run picks up where it stopped.
+const doneFile = out.replace(/\.csv$/, '.done.json');
+const done = new Set(!args.fresh && existsSync(doneFile) ? JSON.parse(readFileSync(doneFile, 'utf8')) : []);
+const leads = done.size && existsSync(out) ? readCsv(out) : [];
+const seen = new Set(leads.map((l) => `${l.name.toLowerCase()}|${l.phone || l.address}`));
+if (done.size) console.log(`Resuming: ${done.size} business types already saved (${leads.length} businesses). Use --fresh to start over.`);
 for (const key of nicheKeys) {
+  if (done.has(key)) continue;
   const niche = getNiche(key);
   const filters = niche.osm.map((t) => {
     const [k, v] = t.split('=');
@@ -87,30 +95,35 @@ for (const key of nicheKeys) {
     const t = el.tags ?? {};
     if (!t.name) continue;
     if (t.brand || t['brand:wikidata']) continue; // chains/franchises aren't small businesses
-    const key2 = `${t.name.toLowerCase()}|${t.phone ?? t['addr:street'] ?? ''}`;
+    const address = [t['addr:housenumber'], t['addr:street'], t['addr:city'], t['addr:state'], t['addr:postcode']]
+      .filter(Boolean).join(' ');
+    const phone = t.phone || t['contact:phone'] || '';
+    const key2 = `${t.name.toLowerCase()}|${phone || address}`;
     if (seen.has(key2)) continue;
     seen.add(key2);
     leads.push({
       name: t.name,
       niche: key,
       city: t['addr:city'] && t['addr:city'].toLowerCase() !== cityName ? `${t['addr:city']}, ${t['addr:state'] ?? ''}`.replace(/, $/, '') : args.city,
-      phone: t.phone || t['contact:phone'] || '',
+      phone,
       email: t.email || t['contact:email'] || '',
       website: t.website || t['contact:website'] || t.url || '',
-      address: [t['addr:housenumber'], t['addr:street'], t['addr:city'], t['addr:state'], t['addr:postcode']]
-        .filter(Boolean).join(' '),
+      address,
       facebook: t['contact:facebook'] || t.facebook || '',
       source: `osm:${el.type}/${el.id}`,
     });
     added++;
   }
-  console.log(`  ${niche.plural}: ${added}`);
+  done.add(key);
+  writeCsv(out, leads);
+  writeFileSync(doneFile, JSON.stringify([...done]));
+  console.log(`  ${niche.plural}: ${added}  (saved, ${leads.length} total)`);
   if (nicheKeys.length > 1) await new Promise((r) => setTimeout(r, 2000)); // be polite to the free servers
 }
 
-const label = nicheKeys.length > 1 ? (args.niche === 'all' ? 'all' : 'mixed') : nicheKeys[0];
-const out = args.out ?? join(DATA, `leads-${label}-${slugify(args.city)}.csv`);
 writeCsv(out, leads);
+const missing = nicheKeys.filter((k) => !done.has(k));
+if (missing.length) console.log(`Not finished (servers busy): ${missing.join(', ')}. Run the same command again to continue.`);
 const noSite = leads.filter((l) => !l.website).length;
 console.log(`Found ${leads.length} small businesses (${noSite} with no website listed) -> ${out}`);
 console.log('Next: node tools/audit-sites.mjs --in ' + out);
