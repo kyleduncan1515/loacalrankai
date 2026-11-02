@@ -2,8 +2,9 @@
 // Step 4: write a personalized cold email + 2 follow-ups for every prospect with an email address.
 // Usage: node tools/write-emails.mjs --in data/leads-...-audited.csv [--top 25]
 // Output: data/emails-....csv (for mail merge) and data/emails-....md (easy copy/paste)
-import { writeFileSync } from 'node:fs';
-import { parseArgs, loadConfig, firstName } from './lib/util.mjs';
+import { writeFileSync, existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { parseArgs, loadConfig, firstName, DATA } from './lib/util.mjs';
 import { readCsv, writeCsv } from './lib/csv.mjs';
 import { NICHES } from './lib/niches.mjs';
 
@@ -61,7 +62,9 @@ function emails(lead) {
 
 const all = readCsv(args.in);
 // Only email businesses where we found a real, specific problem to talk about.
-const sentTo = new Set();
+// Bounced and opted-out addresses (data/do-not-email.txt) are never emailed again.
+const DNE = join(DATA, 'do-not-email.txt');
+const sentTo = new Set(existsSync(DNE) ? readFileSync(DNE, 'utf8').split('\n').map((l) => l.replace(/#.*/, '').trim().toLowerCase()).filter(Boolean) : []);
 // Not a fit: non-profits/government, and franchise dealerships (big companies with their own web teams).
 const NOT_A_BUSINESS = /\b(local \d+|union|church|ministr|school|academy of|association|chamber|city of|county|isd|chevrolet|ford|toyota|honda|nissan|hyundai|kia|dodge|jeep|subaru|mazda|bmw|mercedes|lexus|dealership)\b/i;
 const withEmail = all
