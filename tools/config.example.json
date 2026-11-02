@@ -6,5 +6,6 @@
   "demoBaseUrl": "https://localrank-demos.pages.dev",
   "pricingUrl": "https://your-pricing-page.pages.dev",
   "yourCity": "Your city (optional, used to say you are local)",
-  "websitePlanUrl": "https://buy.stripe.com/YOUR-WEBSITE-PLAN-LINK"
+  "websitePlanUrl": "https://buy.stripe.com/YOUR-WEBSITE-PLAN-LINK",
+  "siteUrl": "https://your-business-site.pages.dev"
 }

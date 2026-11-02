@@ -44,7 +44,7 @@ function emails(lead) {
   const demo = lead.demo_url
     ? `${local ? local + 'so' : 'So'} I put together a free preview of what a new site could look like for you:\n${lead.demo_url}\n\nIt works great on phones and has a tap-to-call button.`
     : `${local ? local + 'and I' : 'I'} can put together a free preview of a new mobile-friendly site for you, with no cost and no obligation.`;
-  const footer = `\n\n${cfg.yourName}\n${cfg.businessName}\n${cfg.mailingAddress}\nNot interested? Just reply "no thanks" and I won't email again.`;
+  const footer = `\n\n${cfg.yourName}\n${cfg.businessName}${cfg.siteUrl && !/your-business-site/.test(cfg.siteUrl) ? `\n${cfg.siteUrl}` : ''}\n${cfg.mailingAddress}\nNot interested? Just reply "no thanks" and I won't email again.`;
   return {
     subject1: `${lead.name}: quick idea for your website`,
     body1: `${hi}\n\n${opener(lead, n)}\n\n${demo}\n\nIf you like it, I can make it live and keep it updated for a small monthly fee. Want me to send details?${footer}`,
