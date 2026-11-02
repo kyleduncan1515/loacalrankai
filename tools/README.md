@@ -13,6 +13,7 @@ and writes a personalized cold email sequence. Everything here is $0: no API key
 ```bash
 npm run leads -- --city "Dallas, TX" --niche roofer          # 1. find businesses (OpenStreetMap)
 npm run audit -- --in data/leads-roofer-dallas-tx.csv         # 2. score who needs help most
+npm run verify -- --in data/leads-roofer-dallas-tx-audited.csv # 2b. confirm claims in a real browser
 npm run demos -- --in data/leads-roofer-dallas-tx-audited.csv # 3. build preview sites
 npx wrangler pages deploy demos --project-name localrank-demos #    publish them free
 npm run emails -- --in data/leads-roofer-dallas-tx-audited.csv # 4. write the emails

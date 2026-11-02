@@ -11,7 +11,8 @@
     "leads": "node tools/find-leads.mjs",
     "audit": "node tools/audit-sites.mjs",
     "demos": "node tools/make-demos.mjs",
-    "emails": "node tools/write-emails.mjs"
+    "emails": "node tools/write-emails.mjs",
+    "verify": "node tools/verify-claims.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",
