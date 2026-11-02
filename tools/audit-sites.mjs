@@ -23,7 +23,12 @@ function findEmail(html) {
     .find((e) => !IGNORE_EMAIL.test(e) && /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/.test(e));
 }
 
-async function audit(lead) {
+const FREEMAIL = /@(gmail|yahoo|hotmail|outlook|aol|icloud|live|msn|att|sbcglobal|comcast|me|ymail|protonmail)\./i;
+
+async function audit(input) {
+  const lead = { ...input };
+  // No website listed, but the email is at their own domain? Then they almost certainly have a site there.
+  if (!lead.website && lead.email && !FREEMAIL.test(lead.email)) lead.website = `https://${lead.email.split('@')[1]}`;
   const r = { ...lead, status: '', issues: '', score: 0, load_seconds: '', copyright_year: '', title: '' };
   const issues = [];
   if (!lead.website) {
@@ -34,11 +39,13 @@ async function audit(lead) {
   }
   const started = Date.now();
   try {
-    const res = await fetch(normalizeUrl(lead.website), {
-      headers: { 'User-Agent': UA },
-      redirect: 'follow',
-      signal: AbortSignal.timeout(15_000),
-    });
+    const get = (url) => fetch(url, { headers: { 'User-Agent': UA }, redirect: 'follow', signal: AbortSignal.timeout(15_000) });
+    let res = await get(normalizeUrl(lead.website));
+    // A broken deep link (old page) doesn't mean the site is broken: check their home page instead.
+    if (res.status === 404 && new URL(res.url).pathname !== '/') {
+      res = await get(new URL('/', res.url).href);
+      r.website = res.url;
+    }
     const html = (await res.text()).slice(0, 4_000_000);
     const secs = (Date.now() - started) / 1000;
     r.load_seconds = secs.toFixed(1);
