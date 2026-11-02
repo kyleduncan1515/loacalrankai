@@ -79,7 +79,7 @@ footer{padding:28px 20px;text-align:center;color:var(--muted);font-size:14px;bor
 }
 
 const leads = readCsv(args.in)
-  .filter((l) => Number(l.score) > 0 && (l.email || args['include-no-email']))
+  .filter((l) => Number(l.score) >= 10 && (l.email || args['include-no-email']))
   .slice(0, top);
 for (const lead of leads) {
   const slug = demoSlug(lead);

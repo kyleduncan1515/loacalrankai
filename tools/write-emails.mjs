@@ -30,6 +30,8 @@ function opener(lead, n) {
     return `I came across ${lead.website} and it looks like it hasn't been updated in a while (${lead.copyright_year}).`;
   if (issues.includes('tap-to-call'))
     return `I pulled up ${lead.website} on my phone and there's no tap-to-call button, so ${n.pain} have to copy your number by hand. A lot of them just call the next business instead.`;
+  if (issues.includes('slow'))
+    return `I tried ${lead.website} on my phone and it took ${lead.load_seconds} seconds to load. Most people give up after about 3 seconds and call someone else.`;
   return `I came across ${lead.name} while looking at ${n.plural} in ${city} and saw a few quick wins for your site and Google listing.`;
 }
 
@@ -52,13 +54,13 @@ function emails(lead) {
 
 const all = readCsv(args.in);
 // Only email businesses where we found a real, specific problem to talk about.
-const withEmail = all.filter((l) => l.email && Number(l.score) > 0).slice(0, top);
+const withEmail = all.filter((l) => l.email && Number(l.score) >= 10).slice(0, top);
 const rows = withEmail.map((l) => ({ email: l.email, name: l.name, phone: l.phone, demo_url: l.demo_url ?? '', ...emails(l) }));
 const base = args.in.replace(/leads-/, 'emails-').replace(/-audited\.csv$|\.csv$/, '');
 writeCsv(`${base}.csv`, rows);
 writeFileSync(`${base}.md`, rows.map((r) =>
   `## ${r.name} <${r.email}>\n\n**Day 1: ${r.subject1}**\n\n${r.body1}\n\n**Day 4: ${r.subject2}**\n\n${r.body2}\n\n**Day 8: ${r.subject3}**\n\n${r.body3}\n`).join('\n---\n\n'));
 
-const noEmail = all.filter((l) => !l.email && Number(l.score) > 0).length;
+const noEmail = all.filter((l) => !l.email && Number(l.score) >= 10).length;
 console.log(`Wrote ${rows.length} email sequences -> ${base}.csv and ${base}.md`);
 if (noEmail) console.log(`${noEmail} good prospects have no email listed; check their Facebook page or website contact form.`);
