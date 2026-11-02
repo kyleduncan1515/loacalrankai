@@ -1,4 +1,3 @@
-import React from 'react';
 import './App.css';
 
 interface PricingPlan {
@@ -57,10 +56,6 @@ const pricingPlans: PricingPlan[] = [
 ];
 
 function App() {
-  const handleSubscribe = (stripeLink: string) => {
-    window.open(stripeLink, '_blank');
-  };
-
   return (
     <div className="pricing-container">
       <div className="pricing-header">
