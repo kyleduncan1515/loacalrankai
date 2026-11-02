@@ -58,9 +58,14 @@ function emails(lead) {
 const all = readCsv(args.in);
 // Only email businesses where we found a real, specific problem to talk about.
 const sentTo = new Set();
-const NOT_A_BUSINESS = /\b(local \d+|union|church|ministr|school|academy of|association|chamber|city of|county|isd)\b/i;
+// Not a fit: non-profits/government, and franchise dealerships (big companies with their own web teams).
+const NOT_A_BUSINESS = /\b(local \d+|union|church|ministr|school|academy of|association|chamber|city of|county|isd|chevrolet|ford|toyota|honda|nissan|hyundai|kia|dodge|jeep|subaru|mazda|bmw|mercedes|lexus|dealership)\b/i;
 const withEmail = all
   .filter((l) => l.email && Number(l.score) >= 10 && !NOT_A_BUSINESS.test(l.name))
+  // Drop weak "problems" (recent copyright year, site-builder only) and keep leads that still have a real one.
+  .map((l) => ({ ...l, issues: l.issues.split('; ').filter((i) => i && i !== 'basic site builder'
+    && !(i.startsWith('looks outdated') && Number(l.copyright_year) > new Date().getFullYear() - 4)).join('; ') }))
+  .filter((l) => l.status !== 'ok' || l.issues)
   // one email per inbox and per business, even if they list two addresses or own two locations
   .filter((l) => {
     const keys = [l.email.toLowerCase(), `name:${l.name.toLowerCase()}`];

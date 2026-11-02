@@ -70,7 +70,7 @@ async function audit(input) {
     if (years.length) {
       const y = Math.max(...years);
       r.copyright_year = y;
-      if (y <= THIS_YEAR - 3) { issues.push(`looks outdated (© ${y})`); r.score += 20; }
+      if (y <= THIS_YEAR - 4) { issues.push(`looks outdated (© ${y})`); r.score += 20; }
     }
     if (!/tel:/i.test(html)) { issues.push('no tap-to-call button'); r.score += 10; }
     if (/wix\.com|weebly|godaddysites|sites\.google/i.test(html + res.url)) { issues.push('basic site builder'); r.score += 5; }
