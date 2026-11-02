@@ -15,7 +15,7 @@ Thanks for getting back to me! Here's how it works:
 - If you already own a web address, we'll use it. If not, I'll help you pick one (about $12 a year, and you own it).
 
 To get started, sign up here:
-[WEBSITE PLAN PAYMENT LINK]
+https://buy.stripe.com/7sY00kdel4oCaiX4PLgA803
 
 Once that's done, I'll send a short list of what I need from you (logo, a few photos, your hours). Most sites are live within 2–3 days after that.
 
