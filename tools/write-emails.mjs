@@ -14,6 +14,9 @@ if (!args.in) {
 }
 const cfg = loadConfig();
 const top = Number(args.top ?? 25);
+// "Good morning" before noon Houston time, otherwise "Good afternoon". Override with --greeting morning|afternoon.
+const houstonHour = Number(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hour12: false }));
+const greeting = args.greeting ? `Good ${args.greeting}` : houstonHour < 12 ? 'Good morning' : 'Good afternoon';
 
 function opener(lead, n) {
   const city = lead.city.split(',')[0];
@@ -39,7 +42,8 @@ function opener(lead, n) {
 
 function emails(lead) {
   const n = NICHES[lead.niche] ?? NICHES.roofer;
-  const hi = firstName(lead.name) ? `Hi ${firstName(lead.name)},` : 'Hi there,';
+  const first = firstName(lead.name);
+  const hi = `${greeting}${first ? ` ${first}` : ''},`;
   const local = cfg.yourCity && !/^your city/i.test(cfg.yourCity) ? `I'm a local web designer here in ${cfg.yourCity}, ` : '';
   const demo = lead.demo_url
     ? `${local ? local + 'so' : 'So'} I put together a free preview of what a new site could look like for you:\n${lead.demo_url}\n\nIt works great on phones and has a tap-to-call button.`

@@ -22,7 +22,7 @@ Your new site is ready! The last step is pointing [DOMAIN] to it. This takes abo
 
 That's it. It can take up to a few hours to start working. If any of this is confusing, reply with a screenshot of the page you're on and I'll tell you exactly what to click.
 
-Kyle
+Kyle Duncan
 RankLocal AI
 https://ranklocal-ai.pages.dev
 

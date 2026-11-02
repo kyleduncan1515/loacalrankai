@@ -21,7 +21,7 @@ Once that's done, I'll send a short list of what I need from you (logo, a few ph
 
 Any questions, just reply here.
 
-Kyle
+Kyle Duncan
 RankLocal AI
 https://ranklocal-ai.pages.dev
 103 N Burnett Dr, Baytown, TX 77520

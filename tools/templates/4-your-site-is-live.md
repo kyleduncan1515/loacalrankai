@@ -17,7 +17,7 @@ Need a change anytime (new photos, prices, hours, a new service)? Just reply to 
 
 Thanks again for trusting me with this!
 
-Kyle
+Kyle Duncan
 RankLocal AI
 https://ranklocal-ai.pages.dev
 103 N Burnett Dr, Baytown, TX 77520
