@@ -38,9 +38,10 @@ function opener(lead, n) {
 function emails(lead) {
   const n = NICHES[lead.niche] ?? NICHES.roofer;
   const hi = firstName(lead.name) ? `Hi ${firstName(lead.name)},` : 'Hi there,';
+  const local = cfg.yourCity && !/^your city/i.test(cfg.yourCity) ? `I'm a local web designer here in ${cfg.yourCity}, ` : '';
   const demo = lead.demo_url
-    ? `So I put together a free preview of what a new site could look like for you:\n${lead.demo_url}\n\nIt works great on phones and has a tap-to-call button.`
-    : `I can put together a free preview of a new mobile-friendly site for you, with no cost and no obligation.`;
+    ? `${local ? local + 'so' : 'So'} I put together a free preview of what a new site could look like for you:\n${lead.demo_url}\n\nIt works great on phones and has a tap-to-call button.`
+    : `${local ? local + 'and I' : 'I'} can put together a free preview of a new mobile-friendly site for you, with no cost and no obligation.`;
   const footer = `\n\n${cfg.yourName}\n${cfg.businessName}\n${cfg.mailingAddress}\nNot interested? Just reply "no thanks" and I won't email again.`;
   return {
     subject1: `${lead.name}: quick idea for your website`,
