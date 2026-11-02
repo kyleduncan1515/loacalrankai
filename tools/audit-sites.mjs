@@ -14,7 +14,7 @@ const THIS_YEAR = new Date().getFullYear();
 const UA = 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Mobile Safari/537.36';
 
 const normalizeUrl = (u) => (/^https?:\/\//i.test(u) ? u : `http://${u}`);
-const IGNORE_EMAIL = /\.(png|jpe?g|gif|webp|svg)$|example\.|sentry|wixpress|godaddy|domain\.com/i;
+const IGNORE_EMAIL = /\.(png|jpe?g|gif|webp|svg)$|example\.|sentry|wixpress|godaddy|domain\.com|@mysite\.|@mystore\.|@yourdomain\.|@email\.com/i;
 
 function findEmail(html) {
   return [...html.matchAll(/mailto:([^"'?\s>]+)/gi)].map((m) => { try { return decodeURIComponent(m[1]); } catch { return m[1]; } })
