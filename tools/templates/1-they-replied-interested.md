@@ -23,7 +23,7 @@ Any questions, just reply here.
 
 Kyle
 RankLocal AI
-103 N Burnett Dr, Baytown, TX 77520
+[YOUR MAILING ADDRESS]
 
 ---
 
