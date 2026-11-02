@@ -51,7 +51,7 @@ function emails(lead) {
     subject2: `Re: ${lead.name}: quick idea for your website`,
     body2: `${hi}\n\nJust bumping this up in case it got buried.${lead.demo_url ? ` The preview is still here: ${lead.demo_url}` : ''}\n\nHappy to tweak anything (colors, photos, services) at no cost so you can see it exactly how you'd want it.${footer}`,
     subject3: `Re: ${lead.name}: quick idea for your website`,
-    body3: `${hi}\n\nLast note from me. If now isn't the right time, no worries at all.\n\nIf you ever want more calls from Google, here's what I offer: ${cfg.pricingUrl}${footer}`,
+    body3: `${hi}\n\nLast note from me. If now isn't the right time, no worries at all.\n\n${lead.demo_url ? `Your preview stays up here if you want it later: ${lead.demo_url}\n\n` : ''}It's $99/month with no setup fee and no contract, and that includes hosting and updates. Just reply "yes" anytime and I'll get it live for you.${footer}`,
   };
 }
 
