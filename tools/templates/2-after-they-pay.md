@@ -22,4 +22,4 @@ Once I have these, your site will be live within 2–3 days.
 
 Kyle
 RankLocal AI
-[YOUR MAILING ADDRESS]
+103 N Burnett Dr, Baytown, TX 77520
