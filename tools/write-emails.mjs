@@ -35,7 +35,7 @@ function opener(lead, n) {
   if (issues.includes('outdated'))
     return `I came across ${lead.website} and it looks like it hasn't been updated in a while (${lead.copyright_year}).`;
   if (issues.includes('tap-to-call'))
-    return `I pulled up ${lead.website} on my phone and there's no tap-to-call button, so ${n.pain} have to copy your number by hand. A lot of them just call the next business instead.`;
+    return `I pulled up ${lead.website} on my phone and there's no tap-to-call button, so ${n.pain} have to copy your number by hand. A lot of them just ${/salon|barber|beauty|grooming/.test(lead.niche) ? 'book with someone else' : 'call the next business'} instead.`;
   if (issues.includes('slow'))
     return `I tried ${lead.website} on my phone and it took ${lead.load_seconds} seconds to load. Most people give up after about 3 seconds and call someone else.`;
   return `I came across ${lead.name} while looking at ${n.plural} in ${city} and saw a few quick wins for your site and Google listing.`;
