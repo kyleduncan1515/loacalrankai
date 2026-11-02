@@ -22,5 +22,5 @@ Once I have these, your site will be live within 2–3 days.
 
 Kyle
 RankLocal AI
-https://website-dnw.pages.dev
+https://ranklocal-ai.pages.dev
 103 N Burnett Dr, Baytown, TX 77520

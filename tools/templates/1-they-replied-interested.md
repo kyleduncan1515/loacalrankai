@@ -23,7 +23,7 @@ Any questions, just reply here.
 
 Kyle
 RankLocal AI
-https://website-dnw.pages.dev
+https://ranklocal-ai.pages.dev
 103 N Burnett Dr, Baytown, TX 77520
 
 ---

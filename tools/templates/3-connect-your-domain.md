@@ -24,7 +24,7 @@ That's it. It can take up to a few hours to start working. If any of this is con
 
 Kyle
 RankLocal AI
-https://website-dnw.pages.dev
+https://ranklocal-ai.pages.dev
 
 ---
 
