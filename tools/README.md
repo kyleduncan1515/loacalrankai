@@ -1,4 +1,4 @@
-# LocalRank AI: free outreach toolkit
+# RankLocal AI: free outreach toolkit
 
 Finds local businesses with bad or missing websites, builds each one a free preview site,
 and writes a personalized cold email sequence. Everything here is $0: no API keys, no card.

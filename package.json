@@ -12,7 +12,8 @@
     "audit": "node tools/audit-sites.mjs",
     "demos": "node tools/make-demos.mjs",
     "emails": "node tools/write-emails.mjs",
-    "verify": "node tools/verify-claims.mjs"
+    "verify": "node tools/verify-claims.mjs",
+    "go-live": "node tools/go-live.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",

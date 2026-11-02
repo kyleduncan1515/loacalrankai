@@ -27,3 +27,5 @@ dist-ssr
 data/
 demos/
 tools/config.json
+clients/
+sites/

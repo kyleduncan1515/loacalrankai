@@ -1,9 +1,10 @@
 {
   "yourName": "Kyle",
-  "businessName": "LocalRank AI",
+  "businessName": "RankLocal AI",
   "replyEmail": "you@gmail.com",
   "mailingAddress": "Your mailing address (required by CAN-SPAM for cold email)",
   "demoBaseUrl": "https://localrank-demos.pages.dev",
   "pricingUrl": "https://your-pricing-page.pages.dev",
-  "yourCity": "Your city (optional, used to say you are local)"
+  "yourCity": "Your city (optional, used to say you are local)",
+  "websitePlanUrl": "https://buy.stripe.com/YOUR-WEBSITE-PLAN-LINK"
 }
