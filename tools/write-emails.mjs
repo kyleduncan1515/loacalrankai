@@ -41,6 +41,9 @@ function opener(lead, n) {
   return `I came across ${lead.name} while looking at ${n.plural} in ${city} and saw a few quick wins for your site and Google listing.`;
 }
 
+// Cities in the Greater Houston area, where "local" is true for a Baytown-based designer.
+const HOME_METRO = /^(houston|baytown|pasadena|pearland|league city|sugar land|missouri city|stafford|katy|cypress|spring|humble|kingwood|atascocita|tomball|the woodlands|conroe|friendswood|webster|seabrook|la porte|deer park|channelview|crosby|highlands|mont belvieu|dayton|texas city|la marque|dickinson|galveston|kemah|clear lake|richmond|rosenberg|fulshear|bellaire|west university place|jersey village|porter|magnolia|alvin|manvel|santa fe|sealy|waller|hockley|new caney|splendora|huffman|cleveland|liberty|anahuac)$/i;
+
 // Version B: shorter, no links at all (better inbox placement); offers to send the preview.
 function shortOpener(lead, n) {
   const city = lead.city.split(',')[0];
@@ -61,7 +64,10 @@ function emails(lead) {
   const n = NICHES[lead.niche] ?? NICHES.roofer;
   const first = firstName(lead.name);
   const hi = `${greeting}${first ? ` ${first}` : ''},`;
-  const local = cfg.yourCity && !/^your city/i.test(cfg.yourCity) ? `I'm a local web designer here in ${cfg.yourCity}, ` : '';
+  // Only call yourself "local" for businesses in your own metro area; elsewhere say where you're based.
+  const isLocal = HOME_METRO.test(lead.city.split(',')[0].trim());
+  const base = cfg.yourCity && !/^your city/i.test(cfg.yourCity) ? cfg.yourCity : '';
+  const local = base ? (isLocal ? `I'm a local web designer here in ${base}, ` : `I'm a web designer based in ${base}, TX, `) : '';
   const demo = lead.demo_url
     ? `${local ? local + 'so' : 'So'} I put together a free preview of what a new site could look like for you:\n${lead.demo_url}\n\nIt works great on phones and has a tap-to-call button.`
     : `${local ? local + 'and I' : 'I'} can put together a free preview of a new mobile-friendly site for you, with no cost and no obligation.`;
@@ -70,7 +76,7 @@ function emails(lead) {
   return {
     subject1: `${lead.name}: quick idea for your website`,
     body1: `${hi}\n\n${opener(lead, n)}\n\n${demo}\n\nIf you like it, I can make it live and keep it updated for a small monthly fee. Want me to send details?${footer}`,
-    body1b: `${hi}\n\n${shortOpener(lead, n)}\n\nI'm a local web designer${cfg.yourCity && !/^your city/i.test(cfg.yourCity) ? ` in ${cfg.yourCity}` : ''} and I already put together a free preview of a new site for you. Want me to send you the link?${footerNoLink}`,
+    body1b: `${hi}\n\n${shortOpener(lead, n)}\n\nI'm a ${isLocal ? 'local web designer' : 'web designer based'}${base ? ` in ${base}${isLocal ? '' : ', TX'}` : ''} and I already put together a free preview of a new site for you. Want me to send you the link?${footerNoLink}`,
     subject2: `Re: ${lead.name}: quick idea for your website`,
     body2: `${hi}\n\nJust bumping this up in case it got buried.${lead.demo_url ? ` The preview is still here: ${lead.demo_url}` : ''}\n\nHappy to tweak anything (colors, photos, services) at no cost so you can see it exactly how you'd want it.${footer}`,
     subject3: `Re: ${lead.name}: quick idea for your website`,
@@ -81,8 +87,9 @@ function emails(lead) {
 const all = readCsv(args.in);
 // Only email businesses where we found a real, specific problem to talk about.
 // Bounced and opted-out addresses (data/do-not-email.txt) are never emailed again.
-const DNE = join(DATA, 'do-not-email.txt');
-const sentTo = new Set(existsSync(DNE) ? readFileSync(DNE, 'utf8').split('\n').map((l) => l.replace(/#.*/, '').trim().toLowerCase()).filter(Boolean) : []);
+// Already-contacted addresses (data/contacted.txt) are skipped too, so nobody gets a second first-email.
+const readList = (f) => (existsSync(join(DATA, f)) ? readFileSync(join(DATA, f), 'utf8').split('\n').map((l) => l.replace(/#.*/, '').trim().toLowerCase()).filter(Boolean) : []);
+const sentTo = new Set([...readList('do-not-email.txt'), ...readList('contacted.txt')]);
 // Not a fit: non-profits/government, and franchise dealerships (big companies with their own web teams).
 // Placeholder addresses left in website templates, and corporate/franchise mail domains.
 const FAKE_OR_CORPORATE_EMAIL = /@(mysite|mystore|example|domain|yourdomain|email|website|yoursite|company|regiscorp|planetbeach)\.(com|org|net)$|^(example|test|name|your|info@example)/i;

@@ -46,7 +46,7 @@ async function overpass(query) {
           method: 'POST',
           headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' },
           body: 'data=' + encodeURIComponent(query),
-          signal: AbortSignal.timeout(100_000),
+          signal: AbortSignal.timeout(200_000),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
@@ -76,23 +76,28 @@ const done = new Set(!args.fresh && existsSync(doneFile) ? JSON.parse(readFileSy
 const leads = done.size && existsSync(out) ? readCsv(out) : [];
 const seen = new Set(leads.map((l) => `${l.name.toLowerCase()}|${l.phone || l.address}`));
 if (done.size) console.log(`Resuming: ${done.size} business types already saved (${leads.length} businesses). Use --fresh to start over.`);
-for (const key of nicheKeys) {
-  if (done.has(key)) continue;
-  const niche = getNiche(key);
-  const filters = niche.osm.map((t) => {
+// --combined: fetch every business type in ONE request (much faster), then sort each result into its type.
+const groups = args.combined ? [{ key: '__all__', keys: nicheKeys.filter((k) => !done.has(k)) }] : nicheKeys.map((k) => ({ key: k, keys: [k] }));
+const nicheOf = (t, keys) => keys.find((k) => getNiche(k).osm.some((f) => { const [a, b] = f.split('='); return t[a] === b; }));
+for (const group of groups) {
+  if (!group.keys.length || (group.key !== '__all__' && done.has(group.key))) continue;
+  const label = group.key === '__all__' ? `${group.keys.length} business types` : getNiche(group.key).plural;
+  const filters = [...new Set(group.keys.flatMap((k) => getNiche(k).osm))].map((t) => {
     const [k, v] = t.split('=');
     return `nwr["${k}"="${v}"](${bbox});`;
   }).join('\n  ');
   let data;
   try {
-    data = await overpass(`[out:json][timeout:80];\n(\n  ${filters}\n);\nout center tags;`);
+    data = await overpass(`[out:json][timeout:170];\n(\n  ${filters}\n);\nout center tags;`);
   } catch (err) {
-    console.warn(`  ${niche.plural}: skipped (${err.message})`);
+    console.warn(`  ${label}: skipped (${err.message})`);
     continue;
   }
   let added = 0;
   for (const el of data.elements ?? []) {
     const t = el.tags ?? {};
+    const key = nicheOf(t, group.keys);
+    if (!key) continue;
     if (!t.name) continue;
     if (t.brand || t['brand:wikidata']) continue; // chains/franchises aren't small businesses
     const address = [t['addr:housenumber'], t['addr:street'], t['addr:city'], t['addr:state'], t['addr:postcode']]
@@ -114,10 +119,10 @@ for (const key of nicheKeys) {
     });
     added++;
   }
-  done.add(key);
+  group.keys.forEach((k) => done.add(k));
   writeCsv(out, leads);
   writeFileSync(doneFile, JSON.stringify([...done]));
-  console.log(`  ${niche.plural}: ${added}  (saved, ${leads.length} total)`);
+  console.log(`  ${label}: ${added}  (saved, ${leads.length} total)`);
   if (nicheKeys.length > 1) await new Promise((r) => setTimeout(r, 2000)); // be polite to the free servers
 }
 
