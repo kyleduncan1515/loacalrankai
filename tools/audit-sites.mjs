@@ -15,6 +15,13 @@ const UA = 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Geck
 const normalizeUrl = (u) => (/^https?:\/\//i.test(u) ? u : `http://${u}`);
 const IGNORE_EMAIL = /\.(png|jpe?g|gif|webp|svg)$|example\.|sentry|wixpress|godaddy|domain\.com/i;
 
+function findEmail(html) {
+  return [...html.matchAll(/mailto:([^"'?\s>]+)/gi)].map((m) => { try { return decodeURIComponent(m[1]); } catch { return m[1]; } })
+    .concat(html.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}(?:\.[a-z]{2,})?/gi) ?? [])
+    .map((e) => e.toLowerCase())
+    .find((e) => !IGNORE_EMAIL.test(e) && /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/.test(e));
+}
+
 async function audit(lead) {
   const r = { ...lead, status: '', issues: '', score: 0, load_seconds: '', copyright_year: '', title: '' };
   const issues = [];
@@ -31,7 +38,7 @@ async function audit(lead) {
       redirect: 'follow',
       signal: AbortSignal.timeout(15_000),
     });
-    const html = (await res.text()).slice(0, 500_000);
+    const html = (await res.text()).slice(0, 4_000_000);
     const secs = (Date.now() - started) / 1000;
     r.load_seconds = secs.toFixed(1);
     if ([401, 403, 406, 429].includes(res.status)) {
@@ -59,11 +66,14 @@ async function audit(lead) {
     }
     if (!/tel:/i.test(html)) { issues.push('no tap-to-call button'); r.score += 10; }
     if (/wix\.com|weebly|godaddysites|sites\.google/i.test(html + res.url)) { issues.push('basic site builder'); r.score += 5; }
-    if (!lead.email) {
-      const found = [...html.matchAll(/mailto:([^"'?\s>]+)/gi)].map((m) => decodeURIComponent(m[1]))
-        .concat(html.match(/[\w.+-]+@[\w-]+\.[\w.-]+/g) ?? [])
-        .find((e) => !IGNORE_EMAIL.test(e));
-      if (found) r.email = found.toLowerCase();
+    if (!lead.email) r.email = findEmail(html) ?? '';
+    // No email on the home page? Check the usual contact pages too.
+    for (const path of ['/contact', '/contact-us', '/about']) {
+      if (r.email) break;
+      try {
+        const page = await fetch(new URL(path, res.url), { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(8_000) });
+        if (page.ok) r.email = findEmail((await page.text()).slice(0, 4_000_000)) ?? '';
+      } catch { /* page missing or slow; skip */ }
     }
   } catch (err) {
     r.status = 'down';

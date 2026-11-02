@@ -54,7 +54,11 @@ function emails(lead) {
 
 const all = readCsv(args.in);
 // Only email businesses where we found a real, specific problem to talk about.
-const withEmail = all.filter((l) => l.email && Number(l.score) >= 10).slice(0, top);
+const sentTo = new Set();
+const withEmail = all
+  .filter((l) => l.email && Number(l.score) >= 10)
+  .filter((l) => !sentTo.has(l.email) && sentTo.add(l.email)) // one email per inbox, even if they own two businesses
+  .slice(0, top);
 const rows = withEmail.map((l) => ({ email: l.email, name: l.name, phone: l.phone, demo_url: l.demo_url ?? '', ...emails(l) }));
 const base = args.in.replace(/leads-/, 'emails-').replace(/-audited\.csv$|\.csv$/, '');
 writeCsv(`${base}.csv`, rows);
