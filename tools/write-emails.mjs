@@ -92,8 +92,8 @@ const readList = (f) => (existsSync(join(DATA, f)) ? readFileSync(join(DATA, f),
 const sentTo = new Set([...readList('do-not-email.txt'), ...readList('contacted.txt')]);
 // Not a fit: non-profits/government, and franchise dealerships (big companies with their own web teams).
 // Placeholder addresses left in website templates, and corporate/franchise mail domains.
-const FAKE_OR_CORPORATE_EMAIL = /@(mysite|mystore|example|domain|yourdomain|email|website|yoursite|company|regiscorp|planetbeach)\.(com|org|net)$|^(example|test|name|your|info@example)/i;
-const NOT_A_BUSINESS = /\b(planet beach|local \d+|union|church|ministr|school|academy of|association|chamber|city of|county|isd|chevrolet|ford|toyota|honda|nissan|hyundai|kia|dodge|jeep|subaru|mazda|bmw|mercedes|lexus|dealership)\b/i;
+const FAKE_OR_CORPORATE_EMAIL = /^(sponsorship|marketing|press|media|careers|jobs|hr|noreply|no-reply)@|@(mysite|mystore|example|domain|yourdomain|email|website|yoursite|company|regiscorp|planetbeach)\.(com|org|net)$|^(example|test|name|your|info@example)/i;
+const NOT_A_BUSINESS = /\b(toni (&|and) guy|planet beach|local \d+|union|church|ministr|school|academy of|association|chamber|city of|county|isd|chevrolet|ford|toyota|honda|nissan|hyundai|kia|dodge|jeep|subaru|mazda|bmw|mercedes|lexus|dealership)\b/i;
 const withEmail = all
   .filter((l) => l.email && Number(l.score) >= 10 && !NOT_A_BUSINESS.test(l.name) && !FAKE_OR_CORPORATE_EMAIL.test(l.email))
   // Texas only, and skip places like military bases and airports (concessions, not independent shops).

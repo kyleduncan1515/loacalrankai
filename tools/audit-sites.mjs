@@ -98,6 +98,11 @@ async function audit(input) {
     }
   }
   r.issues = issues.join('; ');
+  // An email at a domain that doesn't exist will bounce (and hurt your sender reputation): drop it.
+  if (r.email && !FREEMAIL.test(r.email)) {
+    const exists = await lookup(r.email.split('@')[1]).then(() => true, (e) => e.code !== 'ENOTFOUND');
+    if (!exists) r.email = '';
+  }
   return r;
 }
 
