@@ -49,8 +49,8 @@ async function audit(input) {
     const html = (await res.text()).slice(0, 4_000_000);
     const secs = (Date.now() - started) / 1000;
     r.load_seconds = secs.toFixed(1);
-    if ([401, 403, 406, 429, 503].includes(res.status)) {
-      // Usually bot protection (e.g. Cloudflare), not a broken site. Don't claim it's down.
+    if ([400, 401, 403, 406, 429, 503].includes(res.status) || (res.status >= 300 && res.status < 400)) {
+      // Bot protection or a redirect we could not follow: not proof the site is broken, so make no claim.
       r.status = 'unchecked';
       r.issues = `could not check (site blocked our checker, HTTP ${res.status})`;
       return r;
