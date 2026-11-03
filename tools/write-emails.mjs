@@ -35,7 +35,7 @@ function opener(lead, n) {
   if (issues.includes('outdated'))
     return `I came across ${lead.website} and it looks like it hasn't been updated in a while (${lead.copyright_year}).`;
   if (issues.includes('tap-to-call'))
-    return `I pulled up ${lead.website} on my phone and there's no tap-to-call button, so ${n.pain} have to copy your number by hand. A lot of them just ${/salon|barber|beauty|grooming/.test(lead.niche) ? 'book with someone else' : 'call the next business'} instead.`;
+    return `I pulled up ${lead.website} on my phone and there's no tap-to-call button, so ${n.pain} have to copy your number by hand. A lot of them just ${nextChoice(lead.niche)} instead.`;
   if (issues.includes('slow'))
     return `I tried ${lead.website} on my phone and it took ${lead.load_seconds} seconds to load. Most people give up after about 3 seconds and call someone else.`;
   return `I came across ${lead.name} while looking at ${n.plural} in ${city} and saw a few quick wins for your site and Google listing.`;
@@ -44,11 +44,22 @@ function opener(lead, n) {
 // Cities in the Greater Houston area, where "local" is true for a Baytown-based designer.
 const HOME_METRO = /^(houston|baytown|pasadena|pearland|league city|sugar land|missouri city|stafford|katy|cypress|spring|humble|kingwood|atascocita|tomball|the woodlands|conroe|friendswood|webster|seabrook|la porte|deer park|channelview|crosby|highlands|mont belvieu|dayton|texas city|la marque|dickinson|galveston|kemah|clear lake|richmond|rosenberg|fulshear|bellaire|west university place|jersey village|porter|magnolia|alvin|manvel|santa fe|sealy|waller|hockley|new caney|splendora|huffman|cleveland|liberty|anahuac)$/i;
 
+// What a lost customer does instead, in words that fit the business type.
+function nextChoice(niche) {
+  if (/salon|barber|beauty|grooming/.test(niche)) return 'book with someone else';
+  if (niche === 'dentist') return 'call the next dentist';
+  if (niche === 'vet') return 'call the next vet';
+  if (niche === 'lawyer') return 'call the next firm';
+  if (/auto|tire|body-shop|car-wash/.test(niche)) return 'call the next shop';
+  if (niche === 'restaurant') return 'go somewhere else';
+  return 'call the next business';
+}
+
 // Version B: shorter, no links at all (better inbox placement); offers to send the preview.
 function shortOpener(lead, n) {
   const city = lead.city.split(',')[0];
   const issues = lead.issues.toLowerCase();
-  const next = /salon|barber|beauty|grooming/.test(lead.niche) ? 'book with someone else' : 'call the next business';
+  const next = nextChoice(lead.niche);
   if (lead.status === 'no-website') return `I was looking for ${n.plural} in ${city} and couldn't find a website for ${lead.name}. A lot of people searching on their phone may never find you.`;
   if (lead.status === 'broken') return `I tried to visit your website and it's showing an error page instead of your site, so ${n.pain} are probably landing on a competitor instead.`;
   if (lead.status === 'down') return `I tried to visit your website and the address doesn't work anymore, so ${n.pain} are probably landing on a competitor instead.`;
